@@ -1,0 +1,16 @@
+Flask-Script integration.
+
+We could potentially integrate better with Flask modules if we'd allow
+referencing static files from bundles the way you can reference templates:
+"module/file" would select "module/static/file".
+Some work is required in webassets to enable this. Possibly the right
+thing would be to implement general support for custom filesystems (like
+S3), and build this upon it.
+
+Maybe add support for automatic bundle-loading from assets.py files,
+Django-like. However, since we have no single, global environment, we'd
+prefer to collect all "Bundle" instances from a module, rather than
+attempting something like g.assets_env.register().
+
+Using loaders is currently somewhat verbose, it'd be more micro-framework-like
+if we  could say "assets_env.load('yaml', ...)".

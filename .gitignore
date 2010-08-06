@@ -1,0 +1,9 @@
+*.pyc
+
+/BRANCH_TODO
+/flask-assets.wpr
+
+# distutils stuff
+/build/
+/dist/
+/src/Flask_Assets.egg-info/
