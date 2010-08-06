@@ -38,5 +38,9 @@ setup(
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
-    ]
+    ],
+    test_suite='nose.collector',
+    tests_require=[
+        'nose',
+    ],
 )
