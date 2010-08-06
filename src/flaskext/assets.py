@@ -1,5 +1,5 @@
-from webassets import Environment as RawEnvironment, Bundle
-from webassets.env import ConfigStorage
+from webassets import Bundle
+from webassets.env import BaseEnvironment, ConfigStorage
 
 
 __all__ = ('Environment', 'Bundle',)
@@ -26,13 +26,13 @@ class FlaskConfigStorage(ConfigStorage):
         del self.env.app.config[self._transform_key(key)]
 
 
-class Environment(RawEnvironment):
+class Environment(BaseEnvironment):
 
     config_storage_class = FlaskConfigStorage
 
-    def __init__(self, app, directory, url):
+    def __init__(self, app):
         self.app = app
-        super(Environment, self).__init__(directory, url)
+        super(Environment, self).__init__()
 
         self.app.jinja_env.add_extension('webassets.ext.jinja2.AssetsExtension')
         self.app.jinja_env.assets_environment = self
