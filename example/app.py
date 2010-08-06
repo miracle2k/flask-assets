@@ -7,8 +7,12 @@ from flask import Flask, render_template, url_for
 from flaskext.assets import Environment, Bundle
 
 app = Flask(__name__)
+app.config.update({
+    'ASSETS_URL': '/static',
+    'ASSETS_DIRECTORY': './static',
+})
 
-assets = Environment(app, './static', '/static/')
+assets = Environment(app)
 assets.register('main',
                 'style1.css', 'style2.css',
                 output='cached.css', filters='cssmin')
