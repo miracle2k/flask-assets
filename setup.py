@@ -21,8 +21,8 @@ setup(
     description='Asset management for Flask, to compress and merge ' \
         'CSS and Javascript files.',
     long_description=__doc__,
-    packages = find_packages('src'),
-    package_dir = {'': 'src'},
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     namespace_packages=['flaskext'],
     zip_safe=False,
     platforms='any',
