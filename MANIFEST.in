@@ -1,1 +1,1 @@
-include LICENSE CHANGES README *.py
+include LICENSE CHANGES README.rst *.py
