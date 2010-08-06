@@ -13,10 +13,10 @@ class TestConfig:
         self.env = Environment(self.app)
 
     def test_no_defaults(self):
-        """directory and url have no default values.
+        """directory and url have default values.
         """
-        assert_raises(KeyError, getattr, self.env, 'directory')
-        assert_raises(KeyError, getattr, self.env, 'url')
+        assert self.env.directory.startswith(self.app.root_path)
+        assert self.env.url
 
     def test_set_environment(self):
         """Setting a config value on the environment works.

@@ -34,5 +34,8 @@ class Environment(BaseEnvironment):
         self.app = app
         super(Environment, self).__init__()
 
+        self.directory = app.root_path + app.static_path
+        self.url = '/static'
+
         self.app.jinja_env.add_extension('webassets.ext.jinja2.AssetsExtension')
         self.app.jinja_env.assets_environment = self
