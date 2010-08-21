@@ -30,7 +30,6 @@ registering your assets with it in the form of so called *bundles*.
 
 .. code-block:: python
 
-    from os.path import join, dirname
     from flask import Flask
     from flaskext.assets import Environment, Bundle
 
