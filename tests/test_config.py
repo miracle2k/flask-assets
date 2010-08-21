@@ -35,3 +35,13 @@ class TestConfig:
         """
         self.app.config['LESS_PATH'] = '/usr/bin/less'
         assert self.env.config['LESS_PATH'] == '/usr/bin/less'
+
+    def test_no_override(self):
+        """Ensure that the webassets defaults do not override existing
+        Flask config values.
+        """
+        app = Flask(__name__)
+        app.config['ASSETS_UPDATER'] = 'MOO'
+        env = Environment(app)
+        assert env.updater == 'MOO'
+        assert app.config['ASSETS_UPDATER'] == 'MOO'

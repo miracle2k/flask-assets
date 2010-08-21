@@ -16,6 +16,9 @@ class FlaskConfigStorage(ConfigStorage):
         else:
             return key.upper()
 
+    def __contains__(self, key):
+        return self._transform_key(key) in self.env.app.config
+
     def __getitem__(self, key):
         return self.env.app.config[self._transform_key(key)]
 
