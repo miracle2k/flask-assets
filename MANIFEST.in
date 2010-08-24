@@ -1,1 +1,11 @@
 include LICENSE CHANGES README.rst *.py
+
+recursive-include docs *
+prune docs/_build
+prune docs/_themes/.git
+
+recursive-include tests *
+recursive-exclude tests *.pyc
+
+recursive-include example *
+recursive-exclude example *.pyc
