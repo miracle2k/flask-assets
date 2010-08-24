@@ -35,7 +35,7 @@ setup(
     version=".".join(map(str, version)),
     url='http://github.com/miracle2k/flask-assets',
     license='BSD',
-    author='Michael Elsdörfer',
+    author=u'Michael Elsdörfer',
     author_email='michael@elsdoerfer.com',
     description='Asset management for Flask, to compress and merge ' \
         'CSS and Javascript files.',
