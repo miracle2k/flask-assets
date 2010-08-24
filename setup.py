@@ -33,7 +33,7 @@ fp.close()
 setup(
     name='Flask-Assets',
     version=".".join(map(str, version)),
-    url='github.com/miracle2k/flask-assets',
+    url='http://github.com/miracle2k/flask-assets',
     license='BSD',
     author='Michael Elsdörfer',
     author_email='michael@elsdoerfer.com',
