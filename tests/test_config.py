@@ -48,6 +48,13 @@ class TestConfigAppBound:
         assert env.updater == 'MOO'
         assert app.config['ASSETS_UPDATER'] == 'MOO'
 
+         # Neither do the defaults that flask-assets set.
+        app = Flask(__name__)
+        app.config['ASSETS_URL'] = 'MOO'
+        env = Environment(app)
+        assert env.url == 'MOO'
+        assert app.config['ASSETS_URL'] == 'MOO'
+
 
 class TestConfigNoAppBound:
     """The application is not bound to a specific app.
