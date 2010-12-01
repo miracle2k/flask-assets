@@ -57,23 +57,18 @@ class TestConfigNoAppBound:
         self.env = Environment()
 
     def test_no_app_available(self):
-        # While no application is available, we can work just fine
-        # with most config values:
-        assert self.env.debug == self.env.config['debug']
-
-        # However, we cannot read url or directory, since there is no
-        # default we can provide for those.
+        """Without an application bound, we can't do much."""
         assert_raises(RuntimeError, getattr, self.env, 'url')
-        assert_raises(RuntimeError, getattr, self.env, 'directory')
+        assert_raises(RuntimeError, setattr, self.env, 'debug', True)
+        assert_raises(RuntimeError, self.env.config.get, 'debug')
 
-        # However, we may set one.
-        self.env.url = '/static'
-        assert self.env.url == '/static'
+    def test_global_defaults(self):
+        """We may set defaults even without an application, however."""
+        self.env.config.setdefault('FOO', 'BAR')
+        with Flask(__name__).test_request_context():
+            assert self.env.config['FOO'] == 'BAR'
 
-        # Non existent config keys still raise a proper exception
-        assert_raises(IndexError, self.env.config.get, 'foo')
-
-    def test_per_app_defaults(self):
+    def test_app_specific_defaults(self):
         """The defaults for url and directory are read from the app object.
         """
         app = Flask(__name__, static_path='/foo')
@@ -86,9 +81,8 @@ class TestConfigNoAppBound:
             self.env.directory = 'new_media_dir'
             assert self.env.directory == 'new_media_dir'
 
-    def test_multiple_apps(self):
-        """Each app can provide it's own configuration, and fall back
-        to the global default.
+    def test_multiple_separate_apps(self):
+        """Each app has it's own separate configuration.
         """
         app1 = Flask(__name__)
         self.env.init_app(app1)
@@ -96,7 +90,7 @@ class TestConfigNoAppBound:
         # With no app yet available...
         assert_raises(RuntimeError, getattr, self.env, 'url')
         # ...set a default
-        self.env.config['FOO'] = 'BAR'
+        self.env.config.setdefault('FOO', 'BAR')
 
         # When an app is available, the default is used
         with app1.test_request_context():
@@ -109,3 +103,9 @@ class TestConfigNoAppBound:
             app2 = Flask(__name__)
             with app2.test_request_context():
                 assert self.env.config['FOO'] == 'BAR'
+
+    def test_index_error(self):
+        """IndexError is raised if a config value doesn't exist.
+        """
+        with Flask(__name__).test_request_context():
+            assert_raises(IndexError, self.env.config.get, 'YADDAYADDA')
