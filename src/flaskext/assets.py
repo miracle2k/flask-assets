@@ -51,6 +51,9 @@ class FlaskConfigStorage(ConfigStorage):
                            'and no application in current context')
 
     def _app_default_url(self):
+        # TODO: Currently, if the user runs the flask app under a path,
+        # rather than on the domain root, he'll need to adjust this value
+        # manually. Can we do it automatically for him?
         return '/static'
 
     def _app_default_directory(self):
