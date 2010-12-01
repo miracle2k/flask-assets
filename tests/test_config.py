@@ -1,11 +1,13 @@
+"""The Environment configuration is hooked up to the Flask config dict.
+"""
+
 from nose.tools import assert_raises
 from flask import Flask
 from flaskext.assets import Environment
 
 
-class TestConfig:
-    """The Environment configuration is hooked up to the Flask config
-    dict.
+class TestConfigAppBound:
+    """The extension is bound to a specific app.
     """
 
     def setup(self):
@@ -45,3 +47,65 @@ class TestConfig:
         env = Environment(app)
         assert env.updater == 'MOO'
         assert app.config['ASSETS_UPDATER'] == 'MOO'
+
+
+class TestConfigNoAppBound:
+    """The application is not bound to a specific app.
+    """
+
+    def setup(self):
+        self.env = Environment()
+
+    def test_no_app_available(self):
+        # While no application is available, we can work just fine
+        # with most config values:
+        assert self.env.debug == self.env.config['debug']
+
+        # However, we cannot read url or directory, since there is no
+        # default we can provide for those.
+        assert_raises(RuntimeError, getattr, self.env, 'url')
+        assert_raises(RuntimeError, getattr, self.env, 'directory')
+
+        # However, we may set one.
+        self.env.url = '/static'
+        assert self.env.url == '/static'
+
+        # Non existent config keys still raise a proper exception
+        assert_raises(IndexError, self.env.config.get, 'foo')
+
+    def test_per_app_defaults(self):
+        """The defaults for url and directory are read from the app object.
+        """
+        app = Flask(__name__, static_path='/foo')
+        self.env.init_app(app)
+        with app.test_request_context():
+            assert self.env.url.endswith('static')
+            assert self.env.directory.endswith('foo')
+
+            # Can be overridden
+            self.env.directory = 'new_media_dir'
+            assert self.env.directory == 'new_media_dir'
+
+    def test_multiple_apps(self):
+        """Each app can provide it's own configuration, and fall back
+        to the global default.
+        """
+        app1 = Flask(__name__)
+        self.env.init_app(app1)
+
+        # With no app yet available...
+        assert_raises(RuntimeError, getattr, self.env, 'url')
+        # ...set a default
+        self.env.config['FOO'] = 'BAR'
+
+        # When an app is available, the default is used
+        with app1.test_request_context():
+            assert self.env.config['FOO'] == 'BAR'
+
+            # If the default is overridden for this application, it
+            # is still valid for other apps.
+            self.env.config['FOO'] = '42'
+            assert self.env.config['FOO'] == '42'
+            app2 = Flask(__name__)
+            with app2.test_request_context():
+                assert self.env.config['FOO'] == 'BAR'
