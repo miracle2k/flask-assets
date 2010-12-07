@@ -1,2 +1,6 @@
+0.2 (unreleased)
+    - Support for init_app() protocol, multiple applications.
+    - Integrate with Flask-Script, provide management command.
+
 0.1 (2010-09-24)
     Initial release.
