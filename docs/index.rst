@@ -116,6 +116,27 @@ For a list of available settings, see the full
 :ref:`webassets documentation <webassets:environment-configuration>`.
 
 
+Management Command
+------------------
+
+If you have `Flask-Script`_ installed, then a command will be available
+as ``flaskext.assets.ManageAssets``:
+
+.. code-block:: python
+
+    from flaskext.assets import ManageAssets
+    manager = Manager(app)
+    manager.add_command("assets", ManageAssets(assets_env))
+
+
+The command allows you to do things like rebuilding bundles from the
+command line. See the list of
+:ref:`available subcommands <webassets:script-commands>`.
+
+
+.. _Flask-Script: http://pypi.python.org/pypi/Flask-Script
+
+
 Webassets documentation
 -----------------------
 
