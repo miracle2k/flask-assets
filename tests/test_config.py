@@ -111,8 +111,8 @@ class TestConfigNoAppBound:
             with app2.test_request_context():
                 assert self.env.config['FOO'] == 'BAR'
 
-    def test_index_error(self):
-        """IndexError is raised if a config value doesn't exist.
+    def test_key_error(self):
+        """KeyError is raised if a config value doesn't exist.
         """
         with Flask(__name__).test_request_context():
-            assert_raises(IndexError, self.env.config.get, 'YADDAYADDA')
+            assert_raises(KeyError, self.env.config.get, 'YADDAYADDA')

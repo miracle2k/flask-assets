@@ -88,7 +88,7 @@ class FlaskConfigStorage(ConfigStorage):
             return deffunc()
 
         # We've run out of options
-        raise IndexError()
+        raise KeyError()
 
     def __setitem__(self, key, value):
         self._app.config[self._transform_key(key)] = value
