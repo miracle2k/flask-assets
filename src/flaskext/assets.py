@@ -110,3 +110,21 @@ class Environment(BaseEnvironment):
     def init_app(self, app):
         app.jinja_env.add_extension('webassets.ext.jinja2.AssetsExtension')
         app.jinja_env.assets_environment = self
+
+
+try:
+    from flaskext import script
+except ImportError:
+    pass
+else:
+    class ManageAssets(script.Command):
+        """Manage assets."""
+
+        def __init__(self, assets_env):
+            self.env = assets_env
+
+        def handle(self, app, prog, name, remaining_args):
+            from webassets import script
+            script.main(remaining_args, env=self.env)
+
+    __all__ = __all__ + ('ManageAssets',)
