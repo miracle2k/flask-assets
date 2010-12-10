@@ -1,4 +1,5 @@
-from flask import _request_ctx_stack
+from os import path
+from flask import _request_ctx_stack, url_for
 from webassets import Bundle
 from webassets.env import BaseEnvironment, ConfigStorage
 
@@ -51,10 +52,8 @@ class FlaskConfigStorage(ConfigStorage):
                            'and no application in current context')
 
     def _app_default_url(self):
-        # TODO: Currently, if the user runs the flask app under a path,
-        # rather than on the domain root, he'll need to adjust this value
-        # manually. Can we do it automatically for him?
-        return '/static'
+        # By default use url_for with static endpoint (see Environment.absurl)
+        return None
 
     def _app_default_directory(self):
         return self._app.root_path + self._app.static_path
@@ -106,6 +105,36 @@ class Environment(BaseEnvironment):
         super(Environment, self).__init__()
         if app:
             self.init_app(app)
+
+    def absurl(self, fragment):
+        if self.url is not None:
+            return super(Environment, self).absurl(fragment)
+        else:
+            try:
+                filename, query = fragment.split('?', 1)
+                query = '?' + query
+            except (ValueError):
+                filename = fragment
+                query = ''
+            try:
+                module, name = filename.split('/', 1)
+                self.app.modules[module] # generates keyerror if no module
+                endpoint = '%s.static' % module
+                filename = name
+            except (ValueError, KeyError):
+                endpoint = '.static'
+            return url_for(endpoint, filename=filename) + query
+
+    def abspath(self, filename):
+        if path.isabs(filename):
+            return filename
+        try:
+            module, name = filename.split('/', 1)
+            directory = self.app.modules[module].root_path + self.app.static_path
+            filename = name
+        except (ValueError, KeyError):
+            directory = self.directory
+        return path.abspath(path.join(directory, filename))
 
     def init_app(self, app):
         app.jinja_env.add_extension('webassets.ext.jinja2.AssetsExtension')
