@@ -2,8 +2,8 @@
 """
 
 from nose.tools import assert_raises
-from flask import Flask
-from flaskext.assets import Environment
+from flask import Flask, Module
+from flaskext.assets import Environment, Bundle
 
 
 class TestConfigAppBound:
@@ -13,12 +13,6 @@ class TestConfigAppBound:
     def setup(self):
         self.app = Flask(__name__)
         self.env = Environment(self.app)
-
-    def test_no_defaults(self):
-        """directory and url have default values.
-        """
-        assert self.env.directory.startswith(self.app.root_path)
-        assert self.env.url
 
     def test_set_environment(self):
         """Setting a config value on the environment works.
@@ -65,7 +59,6 @@ class TestConfigNoAppBound:
 
     def test_no_app_available(self):
         """Without an application bound, we can't do much."""
-        assert_raises(RuntimeError, getattr, self.env, 'url')
         assert_raises(RuntimeError, setattr, self.env, 'debug', True)
         assert_raises(RuntimeError, self.env.config.get, 'debug')
 
@@ -74,19 +67,6 @@ class TestConfigNoAppBound:
         self.env.config.setdefault('FOO', 'BAR')
         with Flask(__name__).test_request_context():
             assert self.env.config['FOO'] == 'BAR'
-
-    def test_app_specific_defaults(self):
-        """The defaults for url and directory are read from the app object.
-        """
-        app = Flask(__name__, static_path='/foo')
-        self.env.init_app(app)
-        with app.test_request_context():
-            assert self.env.url.endswith('/foo')
-            assert self.env.directory.endswith('/static')
-
-            # Can be overridden
-            self.env.directory = 'new_media_dir'
-            assert self.env.directory == 'new_media_dir'
 
     def test_multiple_separate_apps(self):
         """Each app has it's own separate configuration.
@@ -118,3 +98,85 @@ class TestConfigNoAppBound:
             assert_raises(KeyError, self.env.config.__getitem__, 'YADDAYADDA')
             # The get() helper, on the other hand, simply returns None
             assert self.env.config.get('YADDAYADDA') == None
+
+
+class TestUrlAndDirectory(object):
+    """By default, the 'url' and 'directory' settings of webassets are
+    not used in Flask-Assets; that is, the values are automatically
+    handled based on the configuration of the Flask app and the modules
+    used.
+
+    The user can disable the automatic handling by setting these values
+    if he needs to for some reason.
+
+    Let's test the different scenarios to ensure everything works.
+    """
+
+#    root path without module usage
+#       should already be tested?
+#    root path with module usage
+#       needs to test whether we find the files
+#       test reference to non-existant module##
+#
+#    url without module usage
+#       should already be tested
+#    url with module usage
+#       references the correct files
+#       try with incorrect module reference
+
+#    add documentation
+
+    def setup(self):
+        self.app = Flask(__name__, static_path='/app_static')
+        import test_module
+        self.module = Module(test_module.__name__, name='module',
+                             static_path='/mod_static')
+        self.app.register_module(self.module)
+        self.env = Environment(self.app)
+
+    def config_values_not_set_by_default(self):
+        assert not 'directory' in self.env.config
+        assert not 'url' in self.env.config
+        assert_raises(KeyError, self.env.config.__getitem__, 'directory')
+        assert_raises(KeyError, self.env.config.__getitem__, 'url')
+
+    def test_directory_auto(self):
+        """Test how we handle file references if no root 'directory' is
+        configured manually.
+        """
+        assert not 'directory' in self.env.config
+        root = self.app.root_path
+        assert Bundle('foo').get_files(self.env) == [root + '/static/foo']
+        # Modules prefixes in paths are handled specifically.
+        assert Bundle('module/bar').get_files(self.env) == [root + '/test_module/static/bar']
+        # Prefixes that aren't valid module names are just considered
+        # subfolders of the main app.
+        assert Bundle('nomodule/bar').get_files(self.env) == [root + '/static/nomodule/bar']
+        # In case the name of a app-level subfolder conflicts with a
+        # module name, you can always use this hack:
+        assert Bundle('./module/bar').get_files(self.env) == [root + '/static/module/bar']
+
+    def test_directory_custom(self):
+        """A custom root directory is configured."""
+        self.env.directory = '/tmp'
+        assert Bundle('foo').get_files(self.env) == ['/tmp/foo']
+        # We do not recognize references to modules.
+        assert Bundle('module/bar').get_files(self.env) == ['/tmp/module/bar']
+
+    def test_url_auto(self):
+        """Test how urls are generated if no 'url' is configured manually.
+        """
+        assert not 'url' in self.env.config
+
+        assert Bundle('foo').urls(self.env) == ['/app_static/foo']
+        # Urls for files that point to a module use that module's url prefix.
+        assert Bundle('module/bar').urls(self.env) == ['/mod_static/bar']
+        # Try with a prefix that's not actually a valid module
+        assert Bundle('nomodule/bar').urls(self.env) == ['/app_static/nomodule/bar']
+
+    def test_url_custom(self):
+        """A custom root url is configured."""
+        self.env.url = '/media'
+        assert Bundle('foo').urls(self.env) == ['/media/foo']
+        # We do not recognize references to modules.
+        assert Bundle('module/bar').urls(self.env) == ['/media/module/bar']
