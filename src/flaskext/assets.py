@@ -125,6 +125,6 @@ else:
 
         def handle(self, app, prog, name, remaining_args):
             from webassets import script
-            script.main(remaining_args, env=self.env)
+            return script.main(remaining_args, env=self.env)
 
     __all__ = __all__ + ('ManageAssets',)
