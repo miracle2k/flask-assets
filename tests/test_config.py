@@ -115,4 +115,6 @@ class TestConfigNoAppBound:
         """KeyError is raised if a config value doesn't exist.
         """
         with Flask(__name__).test_request_context():
-            assert_raises(KeyError, self.env.config.get, 'YADDAYADDA')
+            assert_raises(KeyError, self.env.config.__getitem__, 'YADDAYADDA')
+            # The get() helper, on the other hand, simply returns None
+            assert self.env.config.get('YADDAYADDA') == None
