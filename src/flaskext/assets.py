@@ -123,6 +123,7 @@ class Environment(BaseEnvironment):
                 filename = name
             except (ValueError, KeyError):
                 endpoint = '.static'
+            # We could also build the path manually using module.static_path.
             return url_for(endpoint, filename=filename) + query
 
     def abspath(self, filename):
