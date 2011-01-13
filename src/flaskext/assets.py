@@ -1,3 +1,4 @@
+from os import path
 from flask import _request_ctx_stack
 from webassets import Bundle
 from webassets.env import BaseEnvironment, ConfigStorage
@@ -57,7 +58,7 @@ class FlaskConfigStorage(ConfigStorage):
         return '/static'
 
     def _app_default_directory(self):
-        return self._app.root_path + self._app.static_path
+        return path.join(self._app.root_path, 'static')
 
     def setdefault(self, key, value):
         """We may not always be connected to an app, but we still need
