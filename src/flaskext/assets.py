@@ -51,13 +51,6 @@ class FlaskConfigStorage(ConfigStorage):
         raise RuntimeError('assets instance not bound to an application, '+
                            'and no application in current context')
 
-    def _app_default_url(self):
-        # By default use url_for with static endpoint (see Environment.absurl)
-        return None
-
-    def _app_default_directory(self):
-        return path.join(self._app.root_path, 'static')
-
     def setdefault(self, key, value):
         """We may not always be connected to an app, but we still need
         to provide a way to the base environment to set it's defaults.
@@ -107,7 +100,7 @@ class Environment(BaseEnvironment):
             self.init_app(app)
 
     def absurl(self, fragment):
-        if self.url is not None:
+        if self.config.get('url') is not None:
             return super(Environment, self).absurl(fragment)
         else:
             try:
@@ -129,12 +122,14 @@ class Environment(BaseEnvironment):
     def abspath(self, filename):
         if path.isabs(filename):
             return filename
+        if self.config.get('directory') is not None:
+            return super(Environment, self).abspath(filename)
         try:
             module, name = filename.split('/', 1)
             directory = path.join(self.app.modules[module].root_path, 'static')
             filename = name
         except (ValueError, KeyError):
-            directory = self.directory
+            directory = path.join(self.app.root_path, 'static')
         return path.abspath(path.join(directory, filename))
 
     def init_app(self, app):
