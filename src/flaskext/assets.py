@@ -130,7 +130,7 @@ class Environment(BaseEnvironment):
             return filename
         try:
             module, name = filename.split('/', 1)
-            directory = self.app.modules[module].root_path + self.app.static_path
+            directory = path.join(self.app.modules[module].root_path, 'static')
             filename = name
         except (ValueError, KeyError):
             directory = self.directory
