@@ -112,12 +112,11 @@ class Environment(BaseEnvironment):
             try:
                 module, name = filename.split('/', 1)
                 self.app.modules[module] # generates keyerror if no module
-                endpoint = '%s.static' % module
+                static_path = module.static_path
                 filename = name
             except (ValueError, KeyError):
-                endpoint = '.static'
-            # We could also build the path manually using module.static_path.
-            return url_for(endpoint, filename=filename) + query
+                static_path = self.app.static_path
+            return "%s/%s%s" % (static_path, filename, query)
 
     def abspath(self, filename):
         if path.isabs(filename):
