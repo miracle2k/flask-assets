@@ -81,8 +81,8 @@ class TestConfigNoAppBound:
         app = Flask(__name__, static_path='/foo')
         self.env.init_app(app)
         with app.test_request_context():
-            assert self.env.url.endswith('static')
-            assert self.env.directory.endswith('foo')
+            assert self.env.url.endswith('/foo')
+            assert self.env.directory.endswith('/static')
 
             # Can be overridden
             self.env.directory = 'new_media_dir'
