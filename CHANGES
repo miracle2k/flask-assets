@@ -1,6 +1,8 @@
 0.2 (unreleased)
     - Support for init_app() protocol, multiple applications.
     - Integrate with Flask-Script, provide management command.
+    - Properly support Flask modules, with the ability to reference
+      the module's static files in bundles (Olivier Poitrey).
 
 0.1 (2010-09-24)
     Initial release.
