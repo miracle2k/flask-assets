@@ -142,14 +142,24 @@ try:
 except ImportError:
     pass
 else:
+    import argparse
+
+    class CatchAllParser(object):
+        def parse_known_args(self, app_args):
+            return argparse.Namespace(), app_args
+
     class ManageAssets(script.Command):
         """Manage assets."""
+        capture_all_args = True
 
         def __init__(self, assets_env):
             self.env = assets_env
 
-        def handle(self, app, prog, name, remaining_args):
+        def create_parser(self, prog):
+            return CatchAllParser()
+
+        def run(self, args):
             from webassets import script
-            return script.main(remaining_args, env=self.env)
+            return script.main(args, env=self.env)
 
     __all__ = __all__ + ('ManageAssets',)
