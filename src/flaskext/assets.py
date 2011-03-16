@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from os import path
 from flask import _request_ctx_stack, url_for
 from webassets import Bundle
