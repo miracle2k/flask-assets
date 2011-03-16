@@ -1,4 +1,6 @@
 *.pyc
+*.swp
+*.un~
 
 /BRANCH_TODO
 /flask-assets.wpr
