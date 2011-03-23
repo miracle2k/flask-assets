@@ -112,20 +112,6 @@ class TestUrlAndDirectory(object):
     Let's test the different scenarios to ensure everything works.
     """
 
-#    root path without module usage
-#       should already be tested?
-#    root path with module usage
-#       needs to test whether we find the files
-#       test reference to non-existant module##
-#
-#    url without module usage
-#       should already be tested
-#    url with module usage
-#       references the correct files
-#       try with incorrect module reference
-
-#    add documentation
-
     def setup(self):
         self.app = Flask(__name__, static_path='/app_static')
         import test_module
