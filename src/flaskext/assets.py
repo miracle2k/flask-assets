@@ -145,11 +145,13 @@ else:
     class ManageAssets(script.Command):
         """Manage assets."""
 
-        def __init__(self, assets_env):
-            self.env = assets_env
+        capture_all_args = True
 
-        def handle(self, app, prog, name, remaining_args):
+        def run(self, remaining_args):
             from webassets import script
-            return script.main(remaining_args, env=self.env)
+            from flask import current_app
+
+            env = current_app.jinja_env.assets_environment
+            return script.main(remaining_args, env=env)
 
     __all__ = __all__ + ('ManageAssets',)
