@@ -152,7 +152,7 @@ as ``flaskext.assets.ManageAssets``:
 
     from flaskext.assets import ManageAssets
     manager = Manager(app)
-    manager.add_command("assets", ManageAssets(assets_env))
+    manager.add_command("assets", ManageAssets())
 
 
 The command allows you to do things like rebuilding bundles from the
