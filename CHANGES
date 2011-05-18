@@ -1,4 +1,8 @@
-0.2 (2010-03-30)
+0-2-1 (2011-04-28)
+    - Fixed the ManageAssets command to work with the current
+      Flask-Script version.
+
+0.2 (2011-03-30)
     - Support for init_app() protocol, multiple applications.
     - Integrate with Flask-Script, provide management command.
     - Properly support Flask modules, with the ability to reference
