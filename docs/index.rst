@@ -155,6 +155,9 @@ as ``flaskext.assets.ManageAssets``:
     manager = Manager(app)
     manager.add_command("assets", ManageAssets(assets_env))
 
+You can explicitly pass the ``assets_env`` when adding the comm`and as above.
+Alternatively, ``ManageAssets`` will import the ``current_app` from Flask and
+use the ``jinja_env``.
 
 The command allows you to do things like rebuilding bundles from the
 command line. See the list of
