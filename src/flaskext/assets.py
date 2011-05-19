@@ -153,13 +153,22 @@ else:
         """Manage assets."""
         capture_all_args = True
 
-        def __init__(self, assets_env):
+        def __init__(self, assets_env=None):
             self.env = assets_env
 
         def create_parser(self, prog):
             return CatchAllParser()
 
         def run(self, args):
+            """Runs the management script.
+            If ``self.env`` is not defined, it will import it from
+            ``current_app``.
+            """
+
+            if not self.env:
+                from flask import current_app
+                self.env = current_app.jinja_env
+
             from webassets import script
             return script.main(args, env=self.env)
 
