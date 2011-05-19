@@ -14,9 +14,8 @@ class TestScript:
     def setup(self):
         self.app = Flask(__name__)
         self.env = Environment(self.app)
-        self.mgmt = Manager(self.app)
-        self.mgmt.add_command('assets', ManageAssets(self.env))
 
+    def test_call(self):
         # Setup the webassets.script with a mock main() function,
         # so we can check whether our call via Flask-Script actually
         # goes through.
@@ -24,15 +23,36 @@ class TestScript:
             self.last_script_call = argv
             return 0
         from webassets import script
+        old_main = script.main
         script.main = dummy_main
 
-    def test_call(self):
         try:
-            # -h is a great test as that is something Flask-Script might
-            # want to claim for itself.
-            sys.argv = ['./manage.py', 'assets', '-h']
-            self.mgmt.run()
+            mgmt = Manager(self.app)
+            mgmt.add_command('assets', ManageAssets(self.env))
+
+            try:
+                # -h is a great test as that is something Flask-Script might
+                # want to claim for itself.
+                sys.argv = ['./manage.py', 'assets', '-h']
+                mgmt.run()
+            except SystemExit:
+                # Always raised, regardless of success or failure of command
+                pass
+            assert self.last_script_call == ['-h']
+        finally:
+            script.main = old_main
+
+    def test_call_auto_env(self):
+        """Regression test: Passing the environment to the ManageAssets command
+        is optional, it can be auto-detected."""
+        mgmt = Manager(self.app)
+        mgmt.add_command('assets', ManageAssets())
+
+        try:
+            # Used to raise an error due to the env not being properly set.
+            sys.argv = ['./manage.py', 'assets', 'rebuild']
+            mgmt.run()
         except SystemExit:
             # Always raised, regardless of success or failure of command
             pass
-        assert self.last_script_call == ['-h']
+        
