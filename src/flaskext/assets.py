@@ -167,7 +167,7 @@ else:
 
             if not self.env:
                 from flask import current_app
-                self.env = current_app.jinja_env
+                self.env = current_app.jinja_env.assets_environment
 
             from webassets import script
             return script.main(args, env=self.env)
