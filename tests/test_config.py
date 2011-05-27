@@ -4,6 +4,11 @@
 from nose.tools import assert_raises
 from flask import Flask, Module
 from flaskext.assets import Environment, Bundle
+from webassets.updater import BaseUpdater
+
+
+class MooUpdater(BaseUpdater):
+    id = 'MOO'
 
 
 class TestConfigAppBound:
@@ -23,8 +28,8 @@ class TestConfigAppBound:
     def test_set_config(self):
         """Setting a value in the Flask config works.
         """
-        self.app.config['ASSETS_UPDATER'] = 'foo'
-        assert self.env.updater == 'foo'
+        self.app.config['ASSETS_UPDATER'] = 'MOO'
+        assert self.env.updater == 'MOO'
 
     def test_custom_values(self):
         """Custom config values are relayed to the Flask config as.is.
