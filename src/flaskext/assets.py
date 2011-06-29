@@ -116,7 +116,7 @@ class Environment(BaseEnvironment):
                 endpoint = '%s.static' % module
                 filename = name
             except (ValueError, KeyError):
-                endpoint = '.static'
+                endpoint = 'static'
             with self.app.test_request_context():
                 return url_for(endpoint, filename=filename) + query
 
