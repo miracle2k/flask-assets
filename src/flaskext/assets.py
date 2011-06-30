@@ -111,9 +111,9 @@ class Environment(BaseEnvironment):
                 filename = fragment
                 query = ''
             try:
-                module, name = filename.split('/', 1)
-                self.app.modules[module] # generates keyerror if no module
-                endpoint = '%s.static' % module
+                blueprint, name = filename.split('/', 1)
+                self.app.blueprints[blueprint] # generates keyerror if no module
+                endpoint = '%s.static' % blueprint
                 filename = name
             except (ValueError, KeyError):
                 endpoint = 'static'
@@ -126,8 +126,8 @@ class Environment(BaseEnvironment):
         if self.config.get('directory') is not None:
             return super(Environment, self).abspath(filename)
         try:
-            module, name = filename.split('/', 1)
-            directory = path.join(self.app.modules[module].root_path, 'static')
+            blueprint, name = filename.split('/', 1)
+            directory = path.join(self.app.blueprints[blueprint].root_path, 'static')
             filename = name
         except (ValueError, KeyError):
             directory = path.join(self.app.root_path, 'static')
