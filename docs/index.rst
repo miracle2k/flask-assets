@@ -45,7 +45,7 @@ A bundle consists of any number of source files (it may also contain
 other nested bundles), an output target, and a list of filters to apply.
 
 All paths are relative to your app's **static** directory, or the static
-directory of a :ref:`Flask module <modules>`.
+directory of a :ref:`Flask blueprint <blueprints>`.
 
 If you prefer you can of course just as well define your assets in an
 external config file, and read them from there. ``webassets`` includes a
@@ -83,31 +83,33 @@ If you set ``ASSETS_DEBUG`` in your app configuration to ``True``, then
 each source file will be outputted individually instead.
 
 
-.. _modules:
+.. _blueprints:
 
-Flask modules
-~~~~~~~~~~~~~
+Flask blueprints
+~~~~~~~~~~~~~~~~
 
-If you are using Flask modules, you can refer to a module's static files
-via a prefix, in the same way as Flask allows you to reference a module's
+If you are using Flask blueprints, you can refer to a blueprint's static files
+via a prefix, in the same way as Flask allows you to reference a blueprint's
 templates:
 
 .. code-block:: python
 
-    js = Bundle('app_level.js', 'module/module_level.js')
+    js = Bundle('app_level.js', 'blueprint/blueprint_level.js')
 
 In the example above, the bundle would reference two files,
-``{APP_ROOT}/static/app_level.js``, and ``{MODULE_ROOT}/static/module_level.js``.
+``{APP_ROOT}/static/app_level.js``, and ``{BLUEPRINT_ROOT}/static/blueprint_level.js``.
 
 If you have used the ``webassets`` library standalone before, you may be
 familiar with the requirement to set the ``directory`` and ``url``
 configuration values. You will note that this is not required here, as
 Flask's static folder support is used instead. However, note that you *can*
 set a custom root directory or url if you prefer, for some reason. However,
-in this case the module support of Flask-Assets is disabled, that is,
-referencing static files in different modules using a prefix, as described
+in this case the blueprint support of Flask-Assets is disabled, that is,
+referencing static files in different blueprints using a prefix, as described
 above, is no longer possible. All paths will be considered relative to the
 directory and url you specified.
+
+Pre 0.7 modules are also supported; they work exactly the same way.
 
 
 Templates only
