@@ -2,6 +2,7 @@
 *.swp
 *.un~
 
+/.tox
 /BRANCH_TODO
 /flask-assets.wpr
 
