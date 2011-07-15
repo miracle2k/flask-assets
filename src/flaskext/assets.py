@@ -110,13 +110,23 @@ class Environment(BaseEnvironment):
             except (ValueError):
                 filename = fragment
                 query = ''
-            try:
-                blueprint, name = filename.split('/', 1)
-                self.app.blueprints[blueprint] # generates keyerror if no module
-                endpoint = '%s.static' % blueprint
-                filename = name
-            except (ValueError, KeyError):
-                endpoint = 'static'
+            if hasattr(self.app, 'blueprints'):
+                try:
+	            blueprint, name = filename.split('/', 1)
+                    self.app.blueprints[blueprint] # generates keyerror if no module
+                    endpoint = '%s.static' % blueprint
+                    filename = name
+                except (ValueError, KeyError):
+                    endpoint = 'static'
+            else:
+                # Module support for Flask < 0.7
+                try:
+	            module, name = filename.split('/', 1)
+                    self.app.modules[module] # generates keyerror if no module
+                    endpoint = '%s.static' % module
+                    filename = name
+                except (ValueError, KeyError):
+                    endpoint = '.static'
             with self.app.test_request_context():
                 return url_for(endpoint, filename=filename) + query
 
@@ -126,9 +136,15 @@ class Environment(BaseEnvironment):
         if self.config.get('directory') is not None:
             return super(Environment, self).abspath(filename)
         try:
-            blueprint, name = filename.split('/', 1)
-            directory = path.join(self.app.blueprints[blueprint].root_path, 'static')
-            filename = name
+            if hasattr(self.app, 'blueprints'):
+                blueprint, name = filename.split('/', 1)
+                directory = path.join(self.app.blueprints[blueprint].root_path, 'static')
+                filename = name
+            else:
+                # Module support for Flask < 0.7
+                module, name = filename.split('/', 1)
+                directory = path.join(self.app.modules[module].root_path, 'static')
+                filename = name
         except (ValueError, KeyError):
             directory = path.join(self.app.root_path, 'static')
         return path.abspath(path.join(directory, filename))

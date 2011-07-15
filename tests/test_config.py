@@ -2,7 +2,14 @@
 """
 
 from nose.tools import assert_raises
-from flask import Flask, Module
+from flask import Flask
+try:
+    from flask import Blueprint
+except ImportError:
+    # Blueprints only available starting with 0.7,
+    # fall back to old Modules otherwise.
+    Blueprint = None
+    from flask import Module
 from flaskext.assets import Environment, Bundle
 try:
     from webassets.updater import BaseUpdater
@@ -124,9 +131,15 @@ class TestUrlAndDirectory(object):
     def setup(self):
         self.app = Flask(__name__, static_path='/app_static')
         import test_module
-        self.module = Module(test_module.__name__, name='module',
-                             static_path='/mod_static')
-        self.app.register_module(self.module)
+        if not Blueprint:
+            self.module = Module(test_module.__name__, name='module',
+                                 static_path='/mod_static')
+            self.app.register_module(self.module)
+        else:
+            self.blueprint = Blueprint('module', test_module.__name__,
+                                       static_url_path='/mod_static',
+                                       static_folder='static')
+            self.app.register_blueprint(self.blueprint)
         self.env = Environment(self.app)
 
     def config_values_not_set_by_default(self):
