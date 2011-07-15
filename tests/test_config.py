@@ -4,11 +4,15 @@
 from nose.tools import assert_raises
 from flask import Flask, Module
 from flaskext.assets import Environment, Bundle
-from webassets.updater import BaseUpdater
+try:
+    from webassets.updater import BaseUpdater
+except ImportError:
+    BaseUpdater = None   # older webassets versions (<=0.5)
 
 
-class MooUpdater(BaseUpdater):
-    id = 'MOO'
+if BaseUpdater:
+    class MooUpdater(BaseUpdater):
+        id = 'MOO'
 
 
 class TestConfigAppBound:
