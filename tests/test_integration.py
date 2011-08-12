@@ -81,3 +81,16 @@ class TestUrlAndDirectory(object):
         assert Bundle('foo').urls(self.env) == ['/media/foo']
         # We do not recognize references to modules.
         assert Bundle('module/bar').urls(self.env) == ['/media/module/bar']
+
+    def test_existing_request_object_used(self):
+        """[Regression] Check for a bug where the url generation code of
+        Flask-Assets always added a dummy test request to the context stack,
+        instead of using the existing one if there is one.
+
+        We test this by making the context define a custom SCRIPT_NAME
+        prefix, and then we check if it affects the generated urls, as
+        it should.
+        """
+        with self.app.test_request_context(
+                  '/', environ_overrides={'SCRIPT_NAME': '/yourapp'}):
+            assert Bundle('foo').urls(self.env) == ['/yourapp/app_static/foo']

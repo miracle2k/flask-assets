@@ -1,6 +1,6 @@
 from __future__ import with_statement
 from os import path
-from flask import _request_ctx_stack, url_for
+from flask import _request_ctx_stack, url_for, has_request_context
 from webassets import Bundle
 from webassets.env import BaseEnvironment, ConfigStorage
 
@@ -130,8 +130,14 @@ class Environment(BaseEnvironment):
                     filename = name
                 except (ValueError, KeyError):
                     endpoint = '.static'
-            with self.app.test_request_context():
-                return url_for(endpoint, filename=filename) + query
+
+            ctx = None
+            if not has_request_context():
+                ctx = self.app.test_request_context()
+                ctx.push()
+            return url_for(endpoint, filename=filename) + query
+            if ctx:
+                ctx.pop()
 
     def abspath(self, filename):
         if path.isabs(filename):
