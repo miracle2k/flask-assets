@@ -102,6 +102,8 @@ class Environment(BaseEnvironment):
 
     def absurl(self, fragment):
         if self.config.get('url') is not None:
+            # If a manual base url is configured, skip any
+            # blueprint-based auto-generation.
             return super(Environment, self).absurl(fragment)
         else:
             try:
@@ -110,9 +112,10 @@ class Environment(BaseEnvironment):
             except (ValueError):
                 filename = fragment
                 query = ''
+
             if hasattr(self.app, 'blueprints'):
                 try:
-	            blueprint, name = filename.split('/', 1)
+                    blueprint, name = filename.split('/', 1)
                     self.app.blueprints[blueprint] # generates keyerror if no module
                     endpoint = '%s.static' % blueprint
                     filename = name
@@ -121,7 +124,7 @@ class Environment(BaseEnvironment):
             else:
                 # Module support for Flask < 0.7
                 try:
-	            module, name = filename.split('/', 1)
+                    module, name = filename.split('/', 1)
                     self.app.modules[module] # generates keyerror if no module
                     endpoint = '%s.static' % module
                     filename = name
