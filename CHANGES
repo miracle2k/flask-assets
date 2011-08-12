@@ -1,3 +1,12 @@
+0.5.1 (2011-07-11)
+    - New version numbering scheme. The major and minor
+      version numbers will now follow along with the version
+      of webassets the Flask-Assets release was written
+      against, and is guaranteed to be compatible with.
+    - Support for Blueprints (Flask 0.7).
+    - Fixed usage for incorrect request context during URL
+      generation (thank you, julen).
+
 0.2.2 (2011-05-27)
     - Really fix the ManageAssets command.
 
