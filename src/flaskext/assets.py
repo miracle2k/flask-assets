@@ -1,6 +1,6 @@
 from __future__ import with_statement
 from os import path
-from flask import _request_ctx_stack, url_for, has_request_context
+from flask import _request_ctx_stack, url_for
 from webassets import Bundle
 from webassets.env import BaseEnvironment, ConfigStorage
 
@@ -50,7 +50,7 @@ class FlaskConfigStorage(ConfigStorage):
             if ctx is not None:
                 return ctx.app
         raise RuntimeError('assets instance not bound to an application, '+
-                           'and no application in current context')
+                            'and no application in current context')
 
     def setdefault(self, key, value):
         """We may not always be connected to an app, but we still need
@@ -132,7 +132,7 @@ class Environment(BaseEnvironment):
                     endpoint = '.static'
 
             ctx = None
-            if not has_request_context():
+            if not _request_ctx_stack.top:
                 ctx = self.app.test_request_context()
                 ctx.push()
             return url_for(endpoint, filename=filename) + query
