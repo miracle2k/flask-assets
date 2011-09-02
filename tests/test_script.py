@@ -1,3 +1,5 @@
+from __future__ import with_statement
+
 import sys
 from nose import SkipTest
 from flask import Flask
