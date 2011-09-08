@@ -1,6 +1,8 @@
 """The Environment configuration is hooked up to the Flask config dict.
 """
 
+from __future__ import with_statement
+
 from nose.tools import assert_raises
 from flask import Flask
 from flaskext.assets import Environment
