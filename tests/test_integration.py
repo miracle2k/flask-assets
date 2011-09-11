@@ -102,3 +102,27 @@ class TestUrlAndDirectory(object):
         with self.app.test_request_context(
                   '/', environ_overrides={'SCRIPT_NAME': '/yourapp'}):
             assert Bundle('foo').urls(self.env) == ['/yourapp/app_static/foo']
+
+
+class TestUrlAndDirectoryWithInitApp(object):
+    """[Regression] Make sure the automatic "directory" and "url"
+    values also work if the application is initialized via "init_app()".
+    """
+
+    def setup(self):
+        self.app = Flask(__name__, static_path='/initapp_static')
+        self.env = Environment()
+        self.env.init_app(self.app)
+
+    def test(self):
+        """Make sure the "url" and "directory" config values are
+        read from the Flask app.
+        """
+        with self.app.test_request_context():
+            assert not 'url' in self.env.config
+            assert Bundle('foo').urls(self.env) == ['/initapp_static/foo']
+
+            assert not 'directory' in self.env.config
+            root = self.app.root_path
+            assert Bundle('foo').get_files(self.env) == [root + '/static/foo']
+
