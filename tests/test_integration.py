@@ -1,4 +1,5 @@
 from __future__ import with_statement
+from nose.tools import assert_raises
 
 from flask import Flask
 try:
@@ -37,7 +38,7 @@ class TestUrlAndDirectory(object):
             self.app.register_blueprint(self.blueprint)
         self.env = Environment(self.app)
 
-    def config_values_not_set_by_default(self):
+    def test_config_values_not_set_by_default(self):
         assert not 'directory' in self.env.config
         assert not 'url' in self.env.config
         assert_raises(KeyError, self.env.config.__getitem__, 'directory')
