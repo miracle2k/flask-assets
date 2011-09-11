@@ -77,6 +77,11 @@ class TestUrlAndDirectory(object):
         # Try with a prefix that's not actually a valid module
         assert Bundle('nomodule/bar').urls(self.env) == ['/app_static/nomodule/bar']
 
+        # [Regression] Ensure that any request context we may have added
+        # to the stack has been removed.
+        from flask import _request_ctx_stack
+        assert _request_ctx_stack.top is None
+
     def test_url_custom(self):
         """A custom root url is configured."""
         self.env.url = '/media'

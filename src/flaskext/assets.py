@@ -135,9 +135,11 @@ class Environment(BaseEnvironment):
             if not _request_ctx_stack.top:
                 ctx = self.app.test_request_context()
                 ctx.push()
-            return url_for(endpoint, filename=filename) + query
-            if ctx:
-                ctx.pop()
+            try:
+                return url_for(endpoint, filename=filename) + query
+            finally:
+                if ctx:
+                    ctx.pop()
 
     def abspath(self, filename):
         if path.isabs(filename):
