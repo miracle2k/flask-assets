@@ -46,7 +46,7 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'Flask',
+        'Flask>=0.6',
         'webassets==0.6',
     ],
     classifiers=[
