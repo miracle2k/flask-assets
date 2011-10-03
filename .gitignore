@@ -4,7 +4,10 @@
 
 /.tox
 /BRANCH_TODO
+
+# IDEs
 /flask-assets.wpr
+/.idea/*
 
 # distutils stuff
 /build/
