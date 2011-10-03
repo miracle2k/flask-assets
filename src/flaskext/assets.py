@@ -5,7 +5,7 @@ from webassets import Bundle
 from webassets.env import BaseEnvironment, ConfigStorage
 
 
-__version__ = (0, 5, '1')
+__version__ = (0, 6)
 
 __all__ = ('Environment', 'Bundle',)
 
@@ -38,20 +38,6 @@ class FlaskConfigStorage(ConfigStorage):
         else:
             return key.upper()
 
-    @property
-    def _app(self):
-        """The application object to work with; this is either the app
-        that we have been bound to, or the current application.
-        """
-        if self.env.app is not None:
-            return self.env.app
-        else:
-            ctx = _request_ctx_stack.top
-            if ctx is not None:
-                return ctx.app
-        raise RuntimeError('assets instance not bound to an application, '+
-                            'and no application in current context')
-
     def setdefault(self, key, value):
         """We may not always be connected to an app, but we still need
         to provide a way to the base environment to set it's defaults.
@@ -62,14 +48,14 @@ class FlaskConfigStorage(ConfigStorage):
             self._defaults.__setitem__(key, value)
 
     def __contains__(self, key):
-        return self._transform_key(key) in self._app.config
+        return self._transform_key(key) in self.env._app.config
 
     def __getitem__(self, key):
         # First try the current app's config
         public_key = self._transform_key(key)
-        if self._app:
-            if public_key in self._app.config:
-                return self._app.config[public_key]
+        if self.env._app:
+            if public_key in self.env._app.config:
+                return self.env._app.config[public_key]
 
         # Try a non-app specific default value
         if key in self._defaults:
@@ -84,10 +70,10 @@ class FlaskConfigStorage(ConfigStorage):
         raise KeyError()
 
     def __setitem__(self, key, value):
-        self._app.config[self._transform_key(key)] = value
+        self.env._app.config[self._transform_key(key)] = value
 
     def __delitem__(self, key):
-        del self._app.config[self._transform_key(key)]
+        del self.env._app.config[self._transform_key(key)]
 
 
 class Environment(BaseEnvironment):
@@ -99,6 +85,20 @@ class Environment(BaseEnvironment):
         super(Environment, self).__init__()
         if app:
             self.init_app(app)
+
+    @property
+    def _app(self):
+        """The application object to work with; this is either the app
+        that we have been bound to, or the current application.
+        """
+        if self.app is not None:
+            return self.app
+        else:
+            ctx = _request_ctx_stack.top
+            if ctx is not None:
+                return ctx.app
+        raise RuntimeError('assets instance not bound to an application, '+
+                            'and no application in current context')
 
     def absurl(self, fragment):
         if self.config.get('url') is not None:
@@ -113,10 +113,10 @@ class Environment(BaseEnvironment):
                 filename = fragment
                 query = ''
 
-            if hasattr(self.app, 'blueprints'):
+            if hasattr(self._app, 'blueprints'):
                 try:
                     blueprint, name = filename.split('/', 1)
-                    self.app.blueprints[blueprint] # generates keyerror if no module
+                    self._app.blueprints[blueprint] # generates keyerror if no module
                     endpoint = '%s.static' % blueprint
                     filename = name
                 except (ValueError, KeyError):
@@ -125,7 +125,7 @@ class Environment(BaseEnvironment):
                 # Module support for Flask < 0.7
                 try:
                     module, name = filename.split('/', 1)
-                    self.app.modules[module] # generates keyerror if no module
+                    self._app.modules[module] # generates keyerror if no module
                     endpoint = '%s.static' % module
                     filename = name
                 except (ValueError, KeyError):
@@ -133,29 +133,31 @@ class Environment(BaseEnvironment):
 
             ctx = None
             if not _request_ctx_stack.top:
-                ctx = self.app.test_request_context()
+                ctx = self._app.test_request_context()
                 ctx.push()
-            return url_for(endpoint, filename=filename) + query
-            if ctx:
-                ctx.pop()
+            try:
+                return url_for(endpoint, filename=filename) + query
+            finally:
+                if ctx:
+                    ctx.pop()
 
-    def abspath(self, filename):
+    def _normalize_source_path(self, filename):
         if path.isabs(filename):
             return filename
         if self.config.get('directory') is not None:
             return super(Environment, self).abspath(filename)
         try:
-            if hasattr(self.app, 'blueprints'):
+            if hasattr(self._app, 'blueprints'):
                 blueprint, name = filename.split('/', 1)
-                directory = path.join(self.app.blueprints[blueprint].root_path, 'static')
+                directory = path.join(self._app.blueprints[blueprint].root_path, 'static')
                 filename = name
             else:
                 # Module support for Flask < 0.7
                 module, name = filename.split('/', 1)
-                directory = path.join(self.app.modules[module].root_path, 'static')
+                directory = path.join(self._app.modules[module].root_path, 'static')
                 filename = name
         except (ValueError, KeyError):
-            directory = path.join(self.app.root_path, 'static')
+            directory = path.join(self._app.root_path, 'static')
         return path.abspath(path.join(directory, filename))
 
     def init_app(self, app):
