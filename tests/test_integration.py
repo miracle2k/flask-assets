@@ -10,6 +10,7 @@ except ImportError:
     Blueprint = None
     from flask import Module
 from flaskext.assets import Environment, Bundle
+from webassets.bundle import get_all_bundle_files
     
 
 class TestUrlAndDirectory(object):
@@ -50,22 +51,22 @@ class TestUrlAndDirectory(object):
         """
         assert not 'directory' in self.env.config
         root = self.app.root_path
-        assert Bundle('foo').get_files(self.env) == [root + '/static/foo']
+        assert get_all_bundle_files(Bundle('foo'), self.env) == [root + '/static/foo']
         # Modules prefixes in paths are handled specifically.
-        assert Bundle('module/bar').get_files(self.env) == [root + '/test_module/static/bar']
+        assert get_all_bundle_files(Bundle('module/bar'), self.env) == [root + '/test_module/static/bar']
         # Prefixes that aren't valid module names are just considered
         # subfolders of the main app.
-        assert Bundle('nomodule/bar').get_files(self.env) == [root + '/static/nomodule/bar']
+        assert get_all_bundle_files(Bundle('nomodule/bar'), self.env) == [root + '/static/nomodule/bar']
         # In case the name of a app-level subfolder conflicts with a
         # module name, you can always use this hack:
-        assert Bundle('./module/bar').get_files(self.env) == [root + '/static/module/bar']
+        assert get_all_bundle_files(Bundle('./module/bar'), self.env) == [root + '/static/module/bar']
 
     def test_directory_custom(self):
         """A custom root directory is configured."""
         self.env.directory = '/tmp'
-        assert Bundle('foo').get_files(self.env) == ['/tmp/foo']
+        assert get_all_bundle_files(Bundle('foo'), self.env) == ['/tmp/foo']
         # We do not recognize references to modules.
-        assert Bundle('module/bar').get_files(self.env) == ['/tmp/module/bar']
+        assert get_all_bundle_files(Bundle('module/bar'), self.env) == ['/tmp/module/bar']
 
     def test_url_auto(self):
         """Test how urls are generated if no 'url' is configured manually.
@@ -124,5 +125,5 @@ class TestUrlAndDirectoryWithInitApp(object):
 
             assert not 'directory' in self.env.config
             root = self.app.root_path
-            assert Bundle('foo').get_files(self.env) == [root + '/static/foo']
+            assert get_all_bundle_files(Bundle('foo'), self.env) == [root + '/static/foo']
 

@@ -141,7 +141,7 @@ class Environment(BaseEnvironment):
                 if ctx:
                     ctx.pop()
 
-    def abspath(self, filename):
+    def _normalize_source_path(self, filename):
         if path.isabs(filename):
             return filename
         if self.config.get('directory') is not None:
