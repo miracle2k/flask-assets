@@ -1,3 +1,9 @@
+0.6 (unreleased)
+    - Support webassets 0.6.
+    - Fixed use of wrong Flask app in some cases.
+    - Fixed init_app() usage (Oliver Tonnhofer)
+    - Python 2.5 compatibility (Ron DuPlain)
+
 0.5.1 (2011-07-11)
     - New version numbering scheme. The major and minor
       version numbers will now follow along with the version
