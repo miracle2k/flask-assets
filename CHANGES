@@ -4,7 +4,7 @@
     - Fixed init_app() usage (Oliver Tonnhofer)
     - Python 2.5 compatibility (Ron DuPlain)
 
-0.5.1 (2011-07-11)
+0.5.1 (2011-08-12)
     - New version numbering scheme. The major and minor
       version numbers will now follow along with the version
       of webassets the Flask-Assets release was written
