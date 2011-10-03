@@ -47,7 +47,7 @@ setup(
     platforms='any',
     install_requires=[
         'Flask',
-        'webassets',
+        'webassets==0.6',
     ],
     classifiers=[
         'Environment :: Web Environment',
