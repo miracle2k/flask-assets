@@ -5,7 +5,7 @@ from webassets import Bundle
 from webassets.env import BaseEnvironment, ConfigStorage
 
 
-__version__ = (0, 7, 'dev')
+__version__ = (0, 6, 1)
 
 __all__ = ('Environment', 'Bundle',)
 
