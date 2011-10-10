@@ -125,3 +125,25 @@ class TestUrlAndDirectoryWithInitApp(object):
             root = self.app.root_path
             assert get_all_bundle_files(Bundle('foo'), self.env) == [root + '/static/foo']
 
+
+class TestBuild(TempEnvironmentHelper):
+    """[Regression]
+
+    Make sure actually building a bundle works also.
+    """
+
+    default_files = {
+        'foo': 'function bla  () { /* comment */ var a; }    ',
+    }
+
+    def test_build(self):
+        self.mkbundle('foo', filters='rjsmin', output='out').build()
+        assert self.get('out') == 'function bla(){var a;}'
+
+    def test_with_cache_default_directory(self):
+        """[Regression] The cache directory is created in the Flask
+        main static folder.
+        """
+        self.env.cache = True
+        self.mkbundle('foo', filters='rjsmin', output='out').build()
+        assert self.get('out') == 'function bla(){var a;}'

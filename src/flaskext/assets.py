@@ -154,6 +154,21 @@ class Environment(BaseEnvironment):
                 if ctx:
                     ctx.pop()
 
+    # XXX: This is required because in a couple of places, webassets 0.6
+    # still access env.directory, at one point even directly. We need to
+    # fix this for 0.6 compatibility, but it might be preferrable to
+    # introduce another API similar to _normalize_source_path() for things
+    # like the cache directory and output files.
+    def set_directory(self, directory):
+        self.config['directory'] = directory
+    def get_directory(self):
+        if self.config.get('directory') is not None:
+            return self.config['directory']
+        return get_static_folder(self._app)
+    directory = property(get_directory, set_directory, doc=
+    """The base directory to which all paths will be relative to.
+    """)
+
     def _normalize_source_path(self, filename):
         if path.isabs(filename):
             return filename
