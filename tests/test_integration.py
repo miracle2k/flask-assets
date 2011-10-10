@@ -2,16 +2,10 @@ from __future__ import with_statement
 from nose.tools import assert_raises
 
 from flask import Flask
-try:
-    from flask import Blueprint
-except ImportError:
-    # Blueprints only available starting with 0.7,
-    # fall back to old Modules otherwise.
-    Blueprint = None
-    from flask import Module
 from flaskext.assets import Environment, Bundle
 from webassets.bundle import get_all_bundle_files
-    
+from helpers import TempEnvironmentHelper, Module, Blueprint
+
 
 class TestUrlAndDirectory(object):
     """By default, the 'url' and 'directory' settings of webassets are
