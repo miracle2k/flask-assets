@@ -61,6 +61,10 @@ class TestUrlAndDirectory(object):
         # module name, you can always use this hack:
         assert get_all_bundle_files(Bundle('./module/bar'), self.env) == [root + '/static/module/bar']
 
+        # Custom static folder
+        self.app.static_folder = '/'
+        assert get_all_bundle_files(Bundle('foo'), self.env) == ['/foo']
+
     def test_directory_custom(self):
         """A custom root directory is configured."""
         self.env.directory = '/tmp'

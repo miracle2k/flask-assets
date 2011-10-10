@@ -76,6 +76,19 @@ class FlaskConfigStorage(ConfigStorage):
         del self.env._app.config[self._transform_key(key)]
 
 
+
+def get_static_folder(app_or_blueprint):
+    """Return the static folder of the given Flask app
+    instance, or module/blueprint.
+
+    In newer Flask versions this can be customized, in older
+    ones (<=0.6) the folder is fixed.
+    """
+    if hasattr(app_or_blueprint, 'static_folder'):
+        return app_or_blueprint.static_folder
+    return path.join(app_or_blueprint.root_path, 'static')
+
+
 class Environment(BaseEnvironment):
 
     config_storage_class = FlaskConfigStorage
@@ -149,15 +162,15 @@ class Environment(BaseEnvironment):
         try:
             if hasattr(self._app, 'blueprints'):
                 blueprint, name = filename.split('/', 1)
-                directory = path.join(self._app.blueprints[blueprint].root_path, 'static')
+                directory = get_static_folder(self._app.blueprints[blueprint])
                 filename = name
             else:
                 # Module support for Flask < 0.7
                 module, name = filename.split('/', 1)
-                directory = path.join(self._app.modules[module].root_path, 'static')
+                directory = get_static_folder(self._app.modules[module])
                 filename = name
         except (ValueError, KeyError):
-            directory = path.join(self._app.root_path, 'static')
+            directory = get_static_folder(self._app)
         return path.abspath(path.join(directory, filename))
 
     def init_app(self, app):
