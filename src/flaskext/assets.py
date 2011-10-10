@@ -5,7 +5,7 @@ from webassets import Bundle
 from webassets.env import BaseEnvironment, ConfigStorage
 
 
-__version__ = (0, 6)
+__version__ = (0, 6, 1)
 
 __all__ = ('Environment', 'Bundle',)
 
@@ -76,6 +76,19 @@ class FlaskConfigStorage(ConfigStorage):
         del self.env._app.config[self._transform_key(key)]
 
 
+
+def get_static_folder(app_or_blueprint):
+    """Return the static folder of the given Flask app
+    instance, or module/blueprint.
+
+    In newer Flask versions this can be customized, in older
+    ones (<=0.6) the folder is fixed.
+    """
+    if hasattr(app_or_blueprint, 'static_folder'):
+        return app_or_blueprint.static_folder
+    return path.join(app_or_blueprint.root_path, 'static')
+
+
 class Environment(BaseEnvironment):
 
     config_storage_class = FlaskConfigStorage
@@ -141,6 +154,21 @@ class Environment(BaseEnvironment):
                 if ctx:
                     ctx.pop()
 
+    # XXX: This is required because in a couple of places, webassets 0.6
+    # still access env.directory, at one point even directly. We need to
+    # fix this for 0.6 compatibility, but it might be preferrable to
+    # introduce another API similar to _normalize_source_path() for things
+    # like the cache directory and output files.
+    def set_directory(self, directory):
+        self.config['directory'] = directory
+    def get_directory(self):
+        if self.config.get('directory') is not None:
+            return self.config['directory']
+        return get_static_folder(self._app)
+    directory = property(get_directory, set_directory, doc=
+    """The base directory to which all paths will be relative to.
+    """)
+
     def _normalize_source_path(self, filename):
         if path.isabs(filename):
             return filename
@@ -149,15 +177,15 @@ class Environment(BaseEnvironment):
         try:
             if hasattr(self._app, 'blueprints'):
                 blueprint, name = filename.split('/', 1)
-                directory = path.join(self._app.blueprints[blueprint].root_path, 'static')
+                directory = get_static_folder(self._app.blueprints[blueprint])
                 filename = name
             else:
                 # Module support for Flask < 0.7
                 module, name = filename.split('/', 1)
-                directory = path.join(self._app.modules[module].root_path, 'static')
+                directory = get_static_folder(self._app.modules[module])
                 filename = name
         except (ValueError, KeyError):
-            directory = path.join(self._app.root_path, 'static')
+            directory = get_static_folder(self._app)
         return path.abspath(path.join(directory, filename))
 
     def init_app(self, app):

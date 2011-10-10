@@ -1,32 +1,37 @@
-from flask.app import Flask, Blueprint, Module
+from nose import SkipTest
+from nose.tools import assert_raises
+from flask.app import Flask
+try:
+    from flask import __version__ as FLASK_VERSION
+except ImportError:
+    FLASK_VERSION = '0.6'
 from webassets.test import TempEnvironmentHelper as BaseTempEnvironmentHelper
 from flaskext.assets import Environment
 
+try:
+    from flask import Blueprint
+    Module = None
+except ImportError:
+    # Blueprints only available starting with 0.7,
+    # fall back to old Modules otherwise.
+    Blueprint = None
+    from flask import Module
 
-__all__ = ('TempEnvironmentHelper',)
+
+__all__ = ('TempEnvironmentHelper', 'Module', 'Blueprint')
 
 
 class TempEnvironmentHelper(BaseTempEnvironmentHelper):
 
-    def setdp(self):
-        # webassets now requires the files we pass in to exist,
-        # so we can' just do tests with arbitrary filenames.
-        self.app = Flask(__name__, static_path='/app_static')
-        import test_module
-        if not Blueprint:
-            self.module = Module(test_module.__name__, name='module',
-                                 static_path='/mod_static')
-            self.app.register_module(self.module)
-        else:
-            self.blueprint = Blueprint('module', test_module.__name__,
-                                       static_url_path='/mod_static',
-                                       static_folder='static')
-            self.app.register_blueprint(self.blueprint)
-        self.env = Environment(self.app)
-
-
     def _create_environment(self):
+        if FLASK_VERSION < '0.7':
+            # Older Flask versions do not support the
+            # static_folder argument, which we need to use
+            # a temporary folder for static files, without
+            # having to do sys.path hacking.
+            raise SkipTest()
+
         if not hasattr(self, 'app'):
-            self.app = Flask(__name__)
+            self.app = Flask(__name__, static_folder=self.tempdir)
         self.env = Environment(self.app)
         return self.env
