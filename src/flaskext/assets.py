@@ -154,6 +154,13 @@ class Environment(BaseEnvironment):
                 if ctx:
                     ctx.pop()
 
+    def abspath(self, path):
+        """Still needed to resolve the output path.
+        XXX: webassets needs to call _normalize_source_path
+        for this!
+        """
+        return self._normalize_source_path(path)
+
     # XXX: This is required because in a couple of places, webassets 0.6
     # still access env.directory, at one point even directly. We need to
     # fix this for 0.6 compatibility, but it might be preferrable to
