@@ -5,7 +5,7 @@ from webassets import Bundle
 from webassets.env import BaseEnvironment, ConfigStorage
 
 
-__version__ = (0, 6, 1)
+__version__ = (0, 6, 2)
 
 __all__ = ('Environment', 'Bundle',)
 
@@ -153,6 +153,13 @@ class Environment(BaseEnvironment):
             finally:
                 if ctx:
                     ctx.pop()
+
+    def abspath(self, path):
+        """Still needed to resolve the output path.
+        XXX: webassets needs to call _normalize_source_path
+        for this!
+        """
+        return self._normalize_source_path(path)
 
     # XXX: This is required because in a couple of places, webassets 0.6
     # still access env.directory, at one point even directly. We need to
