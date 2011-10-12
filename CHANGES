@@ -1,3 +1,6 @@
+0.6.2 (2011-10-12)
+    - Fixed Blueprint/Module resolving in output path.
+
 0.6.1 (2011-10-10)
     - Building in 0.6 was very much broken (thanks Oliver Tonnhofer).
     - A custom "static_folder" for a Flask app or Blueprint/Module is now

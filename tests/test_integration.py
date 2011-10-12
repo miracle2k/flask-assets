@@ -147,3 +147,20 @@ class TestBuild(TempEnvironmentHelper):
         self.env.cache = True
         self.mkbundle('foo', filters='rjsmin', output='out').build()
         assert self.get('out') == 'function bla(){var a;}'
+
+    def test_blueprint_output(self):
+        """[Regression] Output can point to a blueprint's static
+        directory.
+        """
+        module_static_dir = self.create_directories('module-static')[0]
+        import test_module
+        if not Blueprint:
+            self.module = Module(test_module.__name__, name='module',
+                                 static_folder=module_static_dir)
+            self.app.register_module(self.module)
+        else:
+            self.blueprint = Blueprint('module', test_module.__name__,
+                                       static_folder=module_static_dir)
+            self.app.register_blueprint(self.blueprint)
+        self.mkbundle('foo', filters='rjsmin', output='module/out').build()
+        assert self.get('module-static/out') == 'function bla(){var a;}'
