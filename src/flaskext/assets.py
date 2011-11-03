@@ -233,6 +233,8 @@ else:
             try:
                 if isinstance(args[2], list):
                     args = args[2]
+                else:
+                    raise IndexError
             except IndexError:
                 # restore arguments to same as expected
                 # in previous version of Flask-Assets
