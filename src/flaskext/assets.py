@@ -221,11 +221,22 @@ else:
         def create_parser(self, prog):
             return CatchAllParser()
 
-        def run(self, args):
+        def run(self, *args):
             """Runs the management script.
             If ``self.env`` is not defined, it will import it from
             ``current_app``.
             """
+
+            # NB: this hack for newer versions of Flask-Script
+            # which provide whole bunch of arguments to flask assets
+            # instead of useful ones only.
+            try:
+                if isinstance(args[2], list):
+                    args = args[2]
+            except IndexError:
+                # restore arguments to same as expected
+                # in previous version of Flask-Assets
+                args = args[0]
 
             if not self.env:
                 from flask import current_app
