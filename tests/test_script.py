@@ -3,7 +3,7 @@ from __future__ import with_statement
 import sys
 from nose import SkipTest
 from flask import Flask
-from flaskext.assets import Environment, ManageAssets
+from flask.ext.assets import Environment, ManageAssets
 
 try:
     from flaskext.script import Manager

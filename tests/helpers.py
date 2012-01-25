@@ -6,7 +6,7 @@ try:
 except ImportError:
     FLASK_VERSION = '0.6'
 from webassets.test import TempEnvironmentHelper as BaseTempEnvironmentHelper
-from flaskext.assets import Environment
+from flask.ext.assets import Environment
 
 try:
     from flask import Blueprint

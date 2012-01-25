@@ -2,7 +2,7 @@ from __future__ import with_statement
 from nose.tools import assert_raises
 
 from flask import Flask
-from flaskext.assets import Environment, Bundle
+from flask.ext.assets import Environment, Bundle
 from webassets.bundle import get_all_bundle_files
 from helpers import TempEnvironmentHelper, Module, Blueprint
 

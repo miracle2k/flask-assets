@@ -1,3 +1,9 @@
+Development version (?)
+    - Now officially requires at least Flask 0.8, so it can use the new
+      extension import system, but using the compatibility module, older
+      Flask versions should work fine as well:
+      http://flask.pocoo.org/docs/extensions/
+
 0.6.2 (2011-10-12)
     - Fixed Blueprint/Module resolving in output path.
 

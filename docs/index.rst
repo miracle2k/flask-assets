@@ -1,7 +1,7 @@
 Flask-Assets
 ============
 
-.. module:: flaskext.assets
+.. module:: flask_assets
 
 Flask-Assets helps you to integrate `webassets`_ into your `Flask`_
 application.
@@ -31,7 +31,7 @@ registering your assets with it in the form of so called *bundles*.
 .. code-block:: python
 
     from flask import Flask
-    from flaskext.assets import Environment, Bundle
+    from flask.ext.assets import Environment, Bundle
 
     app = Flask(__name__)
     assets = Environment(app)
@@ -59,7 +59,7 @@ rather than passing a fixed application object:
 .. code-block:: python
 
     app = Flask(__name__)
-    assets = flaskext.assets.Environment()
+    assets = flask.ext.assets.Environment()
     assets.init_app(app)
 
 

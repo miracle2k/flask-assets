@@ -5,3 +5,6 @@ attempting something like g.assets_env.register().
 
 Using loaders is currently somewhat verbose, it'd be more micro-framework-like
 if we  could say "assets_env.load('yaml', ...)".
+
+Now that we officially require Flask 0.8, and are no longer testing
+older versions, remove the support code for those older versions.

@@ -18,7 +18,7 @@ import os, re
 here = os.path.dirname(os.path.abspath(__file__))
 version_re = re.compile(
     r'__version__ = (\(.*?\))')
-fp = open(os.path.join(here, 'src/flaskext', 'assets.py'))
+fp = open(os.path.join(here, 'src', 'flask_assets.py'))
 version = None
 for line in fp:
     match = version_re.search(line)
@@ -42,11 +42,10 @@ setup(
     long_description=__doc__,
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    namespace_packages=['flaskext'],
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'Flask>=0.6',
+        'Flask>=0.8',
         'webassets==0.6',
     ],
     classifiers=[

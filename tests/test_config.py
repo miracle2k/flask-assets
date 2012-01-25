@@ -5,7 +5,7 @@ from __future__ import with_statement
 
 from nose.tools import assert_raises
 from flask import Flask
-from flaskext.assets import Environment
+from flask.ext.assets import Environment
 try:
     from webassets.updater import BaseUpdater
 except ImportError:
