@@ -1,8 +1,7 @@
 from __future__ import with_statement
 from os import path
 from flask import _request_ctx_stack, url_for
-from webassets import Bundle
-from webassets.env import BaseEnvironment, ConfigStorage
+from webassets.env import BaseEnvironment, ConfigStorage, env_options
 
 
 __version__ = (0, 6, 2)
@@ -25,15 +24,12 @@ class FlaskConfigStorage(ConfigStorage):
     allow global across-app defaults.
     """
 
-    _mapping = [
-        'debug', 'cache', 'updater', 'auto_create', 'expire', 'directory', 'url',]
-
     def __init__(self, *a, **kw):
         self._defaults = {}
         ConfigStorage.__init__(self, *a, **kw)
 
     def _transform_key(self, key):
-        if key.lower() in self._mapping:
+        if key.lower() in env_options:
             return "ASSETS_%s" % key.upper()
         else:
             return key.upper()
