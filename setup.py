@@ -41,7 +41,6 @@ setup(
         'CSS and Javascript files.',
     long_description=__doc__,
     packages=find_packages('src'),
-    package_dir={'': 'src'},
     zip_safe=False,
     platforms='any',
     install_requires=[
