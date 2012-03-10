@@ -47,6 +47,10 @@ class FlaskConfigStorage(ConfigStorage):
         return self._transform_key(key) in self.env._app.config
 
     def __getitem__(self, key):
+        value = self._get_deprecated(key)
+        if value:
+            return value
+
         # First try the current app's config
         public_key = self._transform_key(key)
         if self.env._app:
@@ -66,7 +70,8 @@ class FlaskConfigStorage(ConfigStorage):
         raise KeyError()
 
     def __setitem__(self, key, value):
-        self.env._app.config[self._transform_key(key)] = value
+        if not self._set_deprecated(key, value):
+            self.env._app.config[self._transform_key(key)] = value
 
     def __delitem__(self, key):
         del self.env._app.config[self._transform_key(key)]
