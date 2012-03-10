@@ -7,6 +7,12 @@ from webassets.bundle import get_all_bundle_files
 from helpers import TempEnvironmentHelper, Module, Blueprint
 
 
+def test_import():
+    # We want to expose these via the assets extension module.
+    from flask.ext.assets import Bundle
+    from flask.ext.assets import Environment
+
+
 class TestUrlAndDirectory(object):
     """By default, the 'url' and 'directory' settings of webassets are
     not used in Flask-Assets; that is, the values are automatically

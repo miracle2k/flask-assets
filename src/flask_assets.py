@@ -9,6 +9,10 @@ __version__ = (0, 6, 2)
 __all__ = ('Environment', 'Bundle',)
 
 
+# We want to expose this here.
+from webassets import Bundle
+
+
 class FlaskConfigStorage(ConfigStorage):
     """Uses the config object of a Flask app as the backend: either the app
     instance bound to the extension directly, or the current Flasp app on
