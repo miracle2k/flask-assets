@@ -23,7 +23,7 @@ __all__ = ('TempEnvironmentHelper', 'Module', 'Blueprint')
 
 class TempEnvironmentHelper(BaseTempEnvironmentHelper):
 
-    def _create_environment(self):
+    def _create_environment(self, **kwargs):
         if FLASK_VERSION < '0.7':
             # Older Flask versions do not support the
             # static_folder argument, which we need to use
@@ -32,6 +32,6 @@ class TempEnvironmentHelper(BaseTempEnvironmentHelper):
             raise SkipTest()
 
         if not hasattr(self, 'app'):
-            self.app = Flask(__name__, static_folder=self.tempdir)
+            self.app = Flask(__name__, static_folder=self.tempdir, **kwargs)
         self.env = Environment(self.app)
         return self.env

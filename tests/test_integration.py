@@ -154,19 +154,47 @@ class TestBuild(TempEnvironmentHelper):
         self.mkbundle('foo', filters='rjsmin', output='out').build()
         assert self.get('out') == 'function bla(){var a;}'
 
+
+class TestBlueprints(TempEnvironmentHelper):
+
+    default_files = {
+        'foo': 'function bla  () { /* comment */ var a; }    ',
+    }
+
+    def make_blueprint(self, name='module', import_name=None, **kw):
+        if not import_name:
+            import test_module
+            import_name = test_module.__name__
+
+        if not Blueprint:
+            self.module = Module(import_name, name=name)
+            self.app.register_module(self.module)
+        else:
+            self.blueprint = Blueprint(name, import_name, **kw)
+            self.app.register_blueprint(self.blueprint)
+
     def test_blueprint_output(self):
         """[Regression] Output can point to a blueprint's static
         directory.
         """
         module_static_dir = self.create_directories('module-static')[0]
-        import test_module
-        if not Blueprint:
-            self.module = Module(test_module.__name__, name='module',
-                                 static_folder=module_static_dir)
-            self.app.register_module(self.module)
-        else:
-            self.blueprint = Blueprint('module', test_module.__name__,
-                                       static_folder=module_static_dir)
-            self.app.register_blueprint(self.blueprint)
+        self.make_blueprint('module', static_folder=module_static_dir)
         self.mkbundle('foo', filters='rjsmin', output='module/out').build()
         assert self.get('module-static/out') == 'function bla(){var a;}'
+
+    def test_cssrewrite(self):
+        """Make sure cssrewrite works with Blueprints.
+        """
+
+        module_static_dir = self.create_directories('modfolder')[0]
+        self.make_blueprint('modname', static_folder=module_static_dir,
+                            static_url_path='/w/u/f/f')
+        self.create_files(
+                {'modfolder/css': 'h1{background: url("local")}'})
+
+        # Source file is in a Blueprint, output file is app-level.
+        self.mkbundle('modname/css', filters='cssrewrite', output='out').build()
+
+        # The urls are NOT rewritten using the filesystem (/modfolder), but
+        # within the url space.
+        assert self.get('out') == 'h1{background: url("../w/u/f/f/local")}'
