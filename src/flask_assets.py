@@ -231,7 +231,16 @@ else:
                 from flask import current_app
                 self.env = current_app.jinja_env.assets_environment
 
+            # Determine 'prog' - something like for example
+            # "./manage.py assets", to be shown in the help string.
+            # While we don't know the command name we are registered with
+            # in Flask-Assets, we are lucky to be able to rely on the
+            # name being in argv[1].
+            import sys, os.path
+            prog = '%s %s' % (os.path.basename(sys.argv[0]), sys.argv[1])
+
             from webassets import script
-            return script.main(args, env=self.env)
+            return script.GenericArgparseImplementation(
+                self.env, prog=prog).main(args)
 
     __all__ = __all__ + ('ManageAssets',)
