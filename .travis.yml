@@ -1,0 +1,14 @@
+language: python
+python:
+  - 2.6
+install: pip install tox
+# List envs explicitly to skip PyPy
+script: tox -e py25_flask08,py26_flask08,py27_flask08
+notifications:
+  email:
+    - michael@elsdoerfer.com
+branches:
+  only:
+    - master
+
+
