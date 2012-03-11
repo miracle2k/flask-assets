@@ -8,6 +8,7 @@ Integrates the ``webassets`` library with Flask, adding support for
 merging, minifying and compiling CSS and Javascript files.
 """
 
+from __future__ import with_statement
 from setuptools import setup
 
 # Figure out the version; this could be done by importing the
