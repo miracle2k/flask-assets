@@ -13,26 +13,27 @@ from setuptools import setup
 # Figure out the version; this could be done by importing the
 # module, though that requires dependencies to be already installed,
 # which may not be the case when processing a pip requirements
-# file, for example.a
-import os, re
-here = os.path.dirname(os.path.abspath(__file__))
-version_re = re.compile(
-    r'__version__ = (\(.*?\))')
-fp = open(os.path.join(here, 'src', 'flask_assets.py'))
-version = None
-for line in fp:
-    match = version_re.search(line)
-    if match:
-        version = eval(match.group(1))
-        break
-else:
-    raise Exception("cannot find version")
-fp.close()
+# file, for example.
+def parse_version(asignee):
+    import os, re
+    here = os.path.dirname(os.path.abspath(__file__))
+    version_re = re.compile(
+        r'__version__ = (\(.*?\))')
+    with open(os.path.join(here, 'src', 'flask_assets.py')) as fp:
+        for line in fp:
+            match = version_re.search(line)
+            if match:
+                version = eval(match.group(1))
+                return ".".join(map(str, version))
+        else:
+            raise Exception("cannot find version")
+version = parse_version('__version__')
+webassets_version = parse_version('__webassets_version__')
 
 
 setup(
     name='Flask-Assets',
-    version=".".join(map(str, version)),
+    version=version,
     url='http://github.com/miracle2k/flask-assets',
     license='BSD',
     author='Michael Elsdoerfer',
@@ -46,7 +47,7 @@ setup(
     platforms='any',
     install_requires=[
         'Flask>=0.8',
-        'webassets==0.6',
+        'webassets==%s' % webassets_version,
     ],
     classifiers=[
         'Environment :: Web Environment',
