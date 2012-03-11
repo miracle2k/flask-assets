@@ -4,7 +4,7 @@ from flask import _request_ctx_stack, url_for
 from webassets.env import BaseEnvironment, ConfigStorage, env_options
 
 
-__version__ = (0, 6, 2)
+__version__ = (0, 7, 'dev')
 
 __all__ = ('Environment', 'Bundle',)
 
