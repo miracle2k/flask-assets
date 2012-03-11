@@ -213,6 +213,7 @@ except ImportError:
     pass
 else:
     import argparse
+    from webassets.script import GenericArgparseImplementation
 
     class CatchAllParser(object):
         def parse_known_args(self, app_args):
@@ -222,8 +223,9 @@ else:
         """Manage assets."""
         capture_all_args = True
 
-        def __init__(self, assets_env=None):
+        def __init__(self, assets_env=None, impl=GenericArgparseImplementation):
             self.env = assets_env
+            self.implementation = impl
 
         def create_parser(self, prog):
             return CatchAllParser()
@@ -246,8 +248,6 @@ else:
             import sys, os.path
             prog = '%s %s' % (os.path.basename(sys.argv[0]), sys.argv[1])
 
-            from webassets import script
-            return script.GenericArgparseImplementation(
-                self.env, prog=prog).main(args)
+            return self.implementation(self.env, prog=prog).main(args)
 
     __all__ = __all__ + ('ManageAssets',)
