@@ -4,7 +4,7 @@ from os import path
 sys.path.insert(0, path.join(path.dirname(__file__), '../src'))
 
 from flask import Flask, render_template, url_for
-from flaskext.assets import Environment, Bundle
+from flask.ext.assets import Environment, Bundle
 
 app = Flask(__name__)
 

@@ -2,10 +2,13 @@
 """
 
 from __future__ import with_statement
+from helpers import check_warnings
 
 from nose.tools import assert_raises
 from flask import Flask
-from flaskext.assets import Environment
+from flask.ext.assets import Environment
+from webassets.exceptions import ImminentDeprecationWarning
+
 try:
     from webassets.updater import BaseUpdater
 except ImportError:
@@ -110,3 +113,48 @@ class TestConfigNoAppBound:
             # The get() helper, on the other hand, simply returns None
             assert self.env.config.get('YADDAYADDA') == None
 
+
+
+class TestVersionSystemDeprecations(object):
+    """With the introduction of the ``Environment.version`` system,
+    some functionality has been deprecated.
+    """
+
+    def setup(self):
+        app = Flask(__name__)
+        self.env = Environment(app)
+
+    def test_expire_option(self):
+        # Assigning to the expire option raises a deprecation warning
+        with check_warnings(("", ImminentDeprecationWarning)) as w:
+            self.env.expire = True
+        with check_warnings(("", ImminentDeprecationWarning)):
+            self.env.config['expire'] = True
+            # Reading the expire option raises a warning also.
+        with check_warnings(("", ImminentDeprecationWarning)):
+            x = self.env.expire
+        with check_warnings(("", ImminentDeprecationWarning)):
+            x = self.env.config['expire']
+
+    def test_expire_option_passthrough(self):
+        """While "expire" no longer exists, we attempt to provide an
+        emulation."""
+        with check_warnings(("", ImminentDeprecationWarning)):
+            # Read
+            self.env.url_expire = True
+            assert self.env.expire == 'querystring'
+            # Write
+            self.env.expire = False
+            assert self.env.url_expire == False
+            self.env.expire = 'querystring'
+            assert self.env.url_expire == True
+            # "filename" needs to be migrated manually
+            assert_raises(DeprecationWarning, setattr, self.env, 'expire', 'filename')
+
+    def test_updater_option_passthrough(self):
+        """Certain values of the "updater" option have been replaced with
+        auto_build."""
+        with check_warnings(("", ImminentDeprecationWarning)):
+            self.env.auto_build = True
+            self.env.updater = False
+            assert self.env.auto_build == False

@@ -6,7 +6,7 @@ try:
 except ImportError:
     FLASK_VERSION = '0.6'
 from webassets.test import TempEnvironmentHelper as BaseTempEnvironmentHelper
-from flaskext.assets import Environment
+from flask.ext.assets import Environment
 
 try:
     from flask import Blueprint
@@ -23,7 +23,7 @@ __all__ = ('TempEnvironmentHelper', 'Module', 'Blueprint')
 
 class TempEnvironmentHelper(BaseTempEnvironmentHelper):
 
-    def _create_environment(self):
+    def _create_environment(self, **kwargs):
         if FLASK_VERSION < '0.7':
             # Older Flask versions do not support the
             # static_folder argument, which we need to use
@@ -32,6 +32,21 @@ class TempEnvironmentHelper(BaseTempEnvironmentHelper):
             raise SkipTest()
 
         if not hasattr(self, 'app'):
-            self.app = Flask(__name__, static_folder=self.tempdir)
+            self.app = Flask(__name__, static_folder=self.tempdir, **kwargs)
         self.env = Environment(self.app)
         return self.env
+
+
+
+try:
+    from test.test_support import check_warnings
+except ImportError:
+    # Python < 2.6
+    import contextlib
+
+    @contextlib.contextmanager
+    def check_warnings(*filters, **kwargs):
+        # We cannot reasonably support this, we'd have to copy to much code.
+        # (or write our own). Since this is only testing warnings output,
+        # we might slide by ignoring it.
+        yield

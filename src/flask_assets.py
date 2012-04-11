@@ -1,13 +1,18 @@
 from __future__ import with_statement
 from os import path
 from flask import _request_ctx_stack, url_for
-from webassets import Bundle
-from webassets.env import BaseEnvironment, ConfigStorage
+from webassets.env import BaseEnvironment, ConfigStorage, env_options
 
 
-__version__ = (0, 6, 2)
+__version__ = (0, 7)
+__webassets_version__ = (0, 7) # webassets core compatibility. used in setup.py
+
 
 __all__ = ('Environment', 'Bundle',)
+
+
+# We want to expose this here.
+from webassets import Bundle
 
 
 class FlaskConfigStorage(ConfigStorage):
@@ -25,15 +30,12 @@ class FlaskConfigStorage(ConfigStorage):
     allow global across-app defaults.
     """
 
-    _mapping = [
-        'debug', 'cache', 'updater', 'auto_create', 'expire', 'directory', 'url',]
-
     def __init__(self, *a, **kw):
         self._defaults = {}
         ConfigStorage.__init__(self, *a, **kw)
 
     def _transform_key(self, key):
-        if key.lower() in self._mapping:
+        if key.lower() in env_options:
             return "ASSETS_%s" % key.upper()
         else:
             return key.upper()
@@ -51,6 +53,10 @@ class FlaskConfigStorage(ConfigStorage):
         return self._transform_key(key) in self.env._app.config
 
     def __getitem__(self, key):
+        value = self._get_deprecated(key)
+        if value:
+            return value
+
         # First try the current app's config
         public_key = self._transform_key(key)
         if self.env._app:
@@ -70,7 +76,8 @@ class FlaskConfigStorage(ConfigStorage):
         raise KeyError()
 
     def __setitem__(self, key, value):
-        self.env._app.config[self._transform_key(key)] = value
+        if not self._set_deprecated(key, value):
+            self.env._app.config[self._transform_key(key)] = value
 
     def __delitem__(self, key):
         del self.env._app.config[self._transform_key(key)]
@@ -206,6 +213,7 @@ except ImportError:
     pass
 else:
     import argparse
+    from webassets.script import GenericArgparseImplementation
 
     class CatchAllParser(object):
         def parse_known_args(self, app_args):
@@ -215,8 +223,9 @@ else:
         """Manage assets."""
         capture_all_args = True
 
-        def __init__(self, assets_env=None):
+        def __init__(self, assets_env=None, impl=GenericArgparseImplementation):
             self.env = assets_env
+            self.implementation = impl
 
         def create_parser(self, prog):
             return CatchAllParser()
@@ -231,7 +240,14 @@ else:
                 from flask import current_app
                 self.env = current_app.jinja_env.assets_environment
 
-            from webassets import script
-            return script.main(args, env=self.env)
+            # Determine 'prog' - something like for example
+            # "./manage.py assets", to be shown in the help string.
+            # While we don't know the command name we are registered with
+            # in Flask-Assets, we are lucky to be able to rely on the
+            # name being in argv[1].
+            import sys, os.path
+            prog = '%s %s' % (os.path.basename(sys.argv[0]), sys.argv[1])
+
+            return self.implementation(self.env, prog=prog).main(args)
 
     __all__ = __all__ + ('ManageAssets',)
