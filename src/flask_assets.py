@@ -4,8 +4,8 @@ from flask import _request_ctx_stack, url_for
 from webassets.env import BaseEnvironment, ConfigStorage, env_options
 
 
-__version__ = (0, 7, 'dev')
-__webassets_version__ = ('dev',) # webassets core compatibility. used in setup.py
+__version__ = (0, 7)
+__webassets_version__ = (0, 7) # webassets core compatibility. used in setup.py
 
 
 __all__ = ('Environment', 'Bundle',)
