@@ -83,7 +83,6 @@ class FlaskConfigStorage(ConfigStorage):
         del self.env._app.config[self._transform_key(key)]
 
 
-
 def get_static_folder(app_or_blueprint):
     """Return the static folder of the given Flask app
     instance, or module/blueprint.
@@ -213,19 +212,65 @@ except ImportError:
     pass
 else:
     import argparse
-    from webassets.script import GenericArgparseImplementation
+    from webassets.script import GenericArgparseImplementation, CommandError
 
     class CatchAllParser(object):
         def parse_known_args(self, app_args):
             return argparse.Namespace(), app_args
 
+    class FlaskArgparseInterface(GenericArgparseImplementation):
+        """Subclass the CLI implementation to add a --parse-templates option."""
+
+        def _construct_parser(self, *a, **kw):
+            super(FlaskArgparseInterface, self).\
+                _construct_parser(*a, **kw)
+            self.parser.add_argument(
+                '--parse-templates', action='store_true',
+                help='search project templates to find bundles')
+
+        def _setup_assets_env(self, ns, log):
+            env = super(FlaskArgparseInterface, self)._setup_assets_env(ns, log)
+            if env is not None:
+                if ns.parse_templates:
+                    log.info('Searching templates...')
+                    # Note that we exclude container bundles. By their very nature,
+                    # they are guaranteed to have been created by solely referencing
+                    # other bundles which are already registered.
+                    env.add(*[b for b in self.load_from_templates(env)
+                                    if not b.is_container])
+
+                if not len(env):
+                    raise CommandError(
+                        'No asset bundles were found. '
+                        'If you are defining assets directly within '
+                        'your templates, you want to use the '
+                        '--parse-templates option.')
+            return env
+
+        def load_from_templates(self, env):
+            from webassets.ext.jinja2 import Jinja2Loader, AssetsExtension
+            from flask import current_app as app
+
+            # Use the application's Jinja environment to parse
+            jinja2_env = app.jinja_env
+
+            # Get the template directories of app and blueprints
+            template_dirs = [path.join(app.root_path, app.template_folder)]
+            for blueprint in app.blueprints:
+                template_dirs.append(
+                    path.join(blueprint.root_path, blueprint.template_folder))
+
+            return Jinja2Loader(env, template_dirs, [jinja2_env]).load_bundles()
+
     class ManageAssets(script.Command):
         """Manage assets."""
         capture_all_args = True
 
-        def __init__(self, assets_env=None, impl=GenericArgparseImplementation):
+        def __init__(self, assets_env=None, impl=FlaskArgparseInterface,
+                     log=None):
             self.env = assets_env
             self.implementation = impl
+            self.log = log
 
         def create_parser(self, prog):
             return CatchAllParser()
@@ -248,6 +293,7 @@ else:
             import sys, os.path
             prog = '%s %s' % (os.path.basename(sys.argv[0]), sys.argv[1])
 
-            return self.implementation(self.env, prog=prog).main(args)
+            impl = self.implementation(self.env, prog=prog, log=self.log)
+            impl.main(args)
 
     __all__ = __all__ + ('ManageAssets',)
