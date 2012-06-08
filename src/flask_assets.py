@@ -2,6 +2,7 @@ from __future__ import with_statement
 from os import path
 from flask import _request_ctx_stack, url_for
 from webassets.env import BaseEnvironment, ConfigStorage, env_options
+from webassets.loaders import PythonLoader, YAMLLoader
 
 
 __version__ = (0, 8, 'dev')
@@ -205,6 +206,15 @@ class Environment(BaseEnvironment):
         app.jinja_env.add_extension('webassets.ext.jinja2.AssetsExtension')
         app.jinja_env.assets_environment = self
 
+    def from_yaml(self, path):
+        """Register bundles from a YAML configuration file"""
+        bundles = YAMLLoader(path).load_bundles()
+        [self.register(name, bundle) for name, bundle in bundles.iteritems()]
+
+    def from_python(self, path):
+        """Register bundles from a Python module"""
+        bundles = PythonLoader(path).load_bundles()
+        [self.register(name, bundle) for name, bundle in bundles.iteritems()]
 
 try:
     from flaskext import script
