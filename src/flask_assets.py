@@ -211,7 +211,7 @@ class Environment(BaseEnvironment):
         bundles = YAMLLoader(path).load_bundles()
         [self.register(name, bundle) for name, bundle in bundles.iteritems()]
 
-    def from_python(self, path):
+    def from_module(self, path):
         """Register bundles from a Python module"""
         bundles = PythonLoader(path).load_bundles()
         [self.register(name, bundle) for name, bundle in bundles.iteritems()]

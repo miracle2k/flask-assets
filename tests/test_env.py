@@ -23,7 +23,7 @@ class TestEnv:
         assert t.render() == '/foo/file1;/foo/file2;'
 
     def test_from_yaml(self):
-        """Test that a yaml configuration gets loaded
+        """YAML configuration gets loaded
         """
         f = open('test.yaml', 'w')
         f.write("""
@@ -41,14 +41,14 @@ class TestEnv:
 
         os.remove('test.yaml')
 
-    def test_from_python(self):
-        """Test that a python configuration gets loaded
+    def test_from_python_module(self):
+        """Python configuration module gets loaded
         """
         import types
         module = types.ModuleType('test')
         module.pytest = Bundle('pyfile1', 'pyfile2')
 
-        self.env.from_python(module)
+        self.env.from_module(module)
 
         t = self.app.jinja_env.from_string('{% assets "pytest" %}{{ASSET_URL}};{% endassets %}')
         assert t.render() == '/foo/pyfile1;/foo/pyfile2;'
