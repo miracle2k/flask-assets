@@ -2,3 +2,4 @@ nose
 Flask
 Flask-Script
 webassets
+PyYAML
