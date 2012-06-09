@@ -156,5 +156,5 @@ class TestVersionSystemDeprecations(object):
         auto_build."""
         with check_warnings(("", ImminentDeprecationWarning)):
             self.env.auto_build = True
-            self.env.updater = False
+            self.env.updater = 'never'
             assert self.env.auto_build == False
