@@ -13,7 +13,7 @@ def test_import():
     from flask.ext.assets import Environment
 
 
-class TestUrlAndDirectory(object):
+class TestUrlAndDirectory(TempEnvironmentHelper):
     """By default, the 'url' and 'directory' settings of webassets are
     not used in Flask-Assets; that is, the values are automatically
     handled based on the configuration of the Flask app and the modules
@@ -26,6 +26,8 @@ class TestUrlAndDirectory(object):
     """
 
     def setup(self):
+        TempEnvironmentHelper.setup(self)
+
         self.app = Flask(__name__, static_path='/app_static')
         import test_module
         if not Blueprint:
@@ -67,10 +69,12 @@ class TestUrlAndDirectory(object):
 
     def test_directory_custom(self):
         """A custom root directory is configured."""
-        self.env.directory = '/tmp'
-        assert get_all_bundle_files(Bundle('foo'), self.env) == ['/tmp/foo']
+        self.env.load_path = [self.tempdir]
+        self.create_files(['foo', 'module/bar'])
+        print get_all_bundle_files(Bundle('foo'), self.env)
+        assert get_all_bundle_files(Bundle('foo'), self.env) == [self.path('foo')]
         # We do not recognize references to modules.
-        assert get_all_bundle_files(Bundle('module/bar'), self.env) == ['/tmp/module/bar']
+        assert get_all_bundle_files(Bundle('module/bar'), self.env) == [self.path('module/bar')]
 
     def test_url_auto(self):
         """Test how urls are generated if no 'url' is configured manually.
