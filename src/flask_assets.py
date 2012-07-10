@@ -19,7 +19,7 @@ from webassets import Bundle
 
 class FlaskConfigStorage(ConfigStorage):
     """Uses the config object of a Flask app as the backend: either the app
-    instance bound to the extension directly, or the current Flasp app on
+    instance bound to the extension directly, or the current Flask app on
     the stack.
 
     Also provides per-application defaults for some values.
