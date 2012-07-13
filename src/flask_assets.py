@@ -15,6 +15,7 @@ __all__ = ('Environment', 'Bundle',)
 
 # We want to expose this here.
 from webassets import Bundle
+from filter import Jinja2TemplateFilter
 
 
 class FlaskConfigStorage(ConfigStorage):
