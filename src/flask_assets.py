@@ -1,8 +1,10 @@
 from __future__ import with_statement
 from os import path
 from flask import _request_ctx_stack, url_for
+from flask.templating import render_template_string
 from webassets.env import (\
     BaseEnvironment, ConfigStorage, env_options, Resolver, url_prefix_join)
+from webassets.filter import Filter, register_filter
 from webassets.loaders import PythonLoader, YAMLLoader
 
 
@@ -15,6 +17,25 @@ __all__ = ('Environment', 'Bundle',)
 
 # We want to expose this here.
 from webassets import Bundle
+
+
+class Jinja2Filter(Filter):
+    """Will compile all source files as Jinja2 temlates using the standard
+    Flask contexts.
+    """
+    name = 'jinja2'
+
+    def __init__(self, context=None):
+        super(Jinja2Filter, self).__init__()
+        self.context = context or {}
+
+    def input(self, _in, out, source_path, output_path, **kw):
+        out.write(render_template_string(_in.read(), **self.context))
+
+# Override the built-in ``jinja2`` filter that ships with ``webassets``. This
+# custom filter uses Flask's ``render_template_string`` function to provide all
+# the standard Flask template context variables.
+register_filter(Jinja2Filter)
 
 
 class FlaskConfigStorage(ConfigStorage):
