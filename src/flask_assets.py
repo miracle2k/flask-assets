@@ -304,7 +304,9 @@ else:
 
             # Get the template directories of app and blueprints
             template_dirs = [path.join(app.root_path, app.template_folder)]
-            for blueprint in app.blueprints:
+            for blueprint in app.blueprints.values():
+                if blueprint.template_folder is None:
+                    continue
                 template_dirs.append(
                     path.join(blueprint.root_path, blueprint.template_folder))
 
