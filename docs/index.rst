@@ -153,7 +153,7 @@ as ``flaskext.assets.ManageAssets``:
 
 .. code-block:: python
 
-    from flaskext.assets import ManageAssets
+    from flask.ext.assets import ManageAssets
     manager = Manager(app)
     manager.add_command("assets", ManageAssets(assets_env))
 
