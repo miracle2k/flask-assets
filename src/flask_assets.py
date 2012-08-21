@@ -255,7 +255,7 @@ class Environment(BaseEnvironment):
         [self.register(name, bundle) for name, bundle in bundles.iteritems()]
 
 try:
-    from flaskext import script
+    from flask.ext import script
 except ImportError:
     pass
 else:
