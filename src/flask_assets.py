@@ -161,6 +161,12 @@ class FlaskResolver(Resolver):
         return path.normpath(path.join(directory, rel_path))
 
     def resolve_source_to_url(self, filepath, item):
+        if filepath:
+            try:
+                return super(FlaskResolver, self).resolve_source_to_url(filepath, item)
+            except ValueError:
+                pass
+
         if self.env.config.get('url'):
             return url_prefix_join(self.env.url, item)
 
