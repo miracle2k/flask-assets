@@ -3,7 +3,7 @@
 *.un~
 
 /.tox
-/BRANCH_TODO
+/LOCAL_TODO*
 
 # IDEs
 /flask-assets.wpr
