@@ -1,4 +1,5 @@
 from nose.tools import assert_raises
+from nose import SkipTest
 from helpers import TempEnvironmentHelper
 
 
@@ -8,6 +9,11 @@ class TestFilters(TempEnvironmentHelper):
         """This filter used to make trouble because if required
         Environment.url and Environment.directory to be set.
         """
+        try:
+            import scss
+        except ImportError:
+            raise SkipTest()
+
         self.create_files({'foo': ''})
         bundle = self.mkbundle('foo', filters='pyscss', output='out')
 
