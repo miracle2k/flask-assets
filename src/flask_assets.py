@@ -119,7 +119,24 @@ def get_static_folder(app_or_blueprint):
 
 
 class FlaskResolver(Resolver):
-    """Support Flask blueprints."""
+    """Adds support for Flask blueprints.
+
+    This resolver is designed to use the Flask staticfile system to
+    locate files, by looking at directory prefixes (``foo/bar.png``
+    looks in the static folder of the ``foo`` blueprint. ``url_for``
+    is used to generate urls to these files.
+
+    This default behaviour changes when you start setting certain
+    standard *webassets* path and url configuration values:
+
+    If a :attr:`Environment.directory` is set, output files will
+    always be written there, while source files still use the Flask
+    system.
+
+    If a :attr:`Environment.load_path` is set, it is used to look
+    up source files, replacing the Flask system. Blueprint prefixes
+    are no longer resolved.
+    """
 
     def split_prefix(self, item):
         """See if ``item`` has blueprint prefix, return (directory, rel_path).
@@ -139,11 +156,23 @@ class FlaskResolver(Resolver):
 
         return directory, item
 
+    @property
+    def use_webassets_system_for_output(self):
+        return self.env.config.get('directory') is not None or \
+               self.env.config.get('url') is not None
+
+    @property
+    def use_webassets_system_for_sources(self):
+        return bool(self.env.load_path)
+
     def search_for_source(self, item):
-        if self.env.load_path:
-            # Note: With only env.directory set, we don't go to default;
-            # Setting env.directory only makes the output directory fixed.
+        # If a load_path is set, use it instead of the Flask static system.
+        #
+        # Note: With only env.directory set, we don't go to default;
+        # Setting env.directory only makes the output directory fixed.
+        if self.use_webassets_system_for_sources:
             return Resolver.search_for_source(self, item)
+
         # Look in correct blueprint's directory
         directory, item = self.split_prefix(item)
         try:
@@ -154,21 +183,24 @@ class FlaskResolver(Resolver):
             return path.normpath(path.join(directory, item))
 
     def resolve_output_to_path(self, target, bundle):
-        if self.env.config.get('directory'):
+        # If a directory/url pair is set, always use it for output files
+        if self.use_webassets_system_for_output:
             return Resolver.resolve_output_to_path(self, target, bundle)
+
         # Allow targeting blueprint static folders
         directory, rel_path = self.split_prefix(target)
         return path.normpath(path.join(directory, rel_path))
 
     def resolve_source_to_url(self, filepath, item):
-        if self.env.config.get('url'):
-            return url_prefix_join(self.env.url, item)
+        # If a load path is set, use it instead of the Flask static system.
+        if self.use_webassets_system_for_sources:
+            return super(FlaskResolver, self).resolve_source_to_url(filepath, item)
 
         filename = item
         if hasattr(self.env._app, 'blueprints'):
             try:
                 blueprint, name = item.split('/', 1)
-                self.env._app.blueprints[blueprint] # keyerror if no module
+                self.env._app.blueprints[blueprint]  # keyerror if no module
                 endpoint = '%s.static' % blueprint
                 filename = name
             except (ValueError, KeyError):
@@ -177,7 +209,7 @@ class FlaskResolver(Resolver):
             # Module support for Flask < 0.7
             try:
                 module, name = item.split('/', 1)
-                self.env._app.modules[module] # keyerror if no module
+                self.env._app.modules[module]  # keyerror if no module
                 endpoint = '%s.static' % module
                 filename = name
             except (ValueError, KeyError):
@@ -194,7 +226,11 @@ class FlaskResolver(Resolver):
                 ctx.pop()
 
     def resolve_output_to_url(self, target):
-        # Behaves like the source directory
+        # With a directory/url pair set, use it for output files.
+        if self.use_webassets_system_for_output:
+            return Resolver.resolve_output_to_url(self, target)
+
+        # Otherwise, behaves like generating urls to a source file.
         return self.resolve_source_to_url(None, target)
 
 

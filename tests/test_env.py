@@ -10,17 +10,13 @@ class TestEnv:
         self.app = Flask(__name__)
         self.env = Environment(self.app)
         self.env.debug = True
-        self.app.config.update({
-            'ASSETS_DIRECTORY': '',
-            'ASSETS_URL': '/foo',
-        })
         self.env.register('test', 'file1', 'file2')
 
     def test_tag_available(self):
         """Jinja tag has been made available.
         """
         t = self.app.jinja_env.from_string('{% assets "test" %}{{ASSET_URL}};{% endassets %}')
-        assert t.render() == '/foo/file1;/foo/file2;'
+        assert t.render() == '/static/file1;/static/file2;'
 
     def test_from_yaml(self):
         """YAML configuration gets loaded
@@ -37,7 +33,7 @@ class TestEnv:
         self.env.from_yaml('test.yaml')
 
         t = self.app.jinja_env.from_string('{% assets "yamltest" %}{{ASSET_URL}};{% endassets %}')
-        assert t.render() == '/foo/yamlfile1;/foo/yamlfile2;'
+        assert t.render() == '/static/yamlfile1;/static/yamlfile2;'
 
         os.remove('test.yaml')
 
@@ -51,4 +47,4 @@ class TestEnv:
         self.env.from_module(module)
 
         t = self.app.jinja_env.from_string('{% assets "pytest" %}{{ASSET_URL}};{% endassets %}')
-        assert t.render() == '/foo/pyfile1;/foo/pyfile2;'
+        assert t.render() == '/static/pyfile1;/static/pyfile2;'

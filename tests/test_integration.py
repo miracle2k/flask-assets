@@ -48,8 +48,9 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         assert_raises(KeyError, self.env.config.__getitem__, 'url')
 
     def test_directory_auto(self):
-        """Test how we handle file references if no root 'directory' is
-        configured manually.
+        """Test how we resolve file references through the Flask static
+        system by default (if no custom 'env.directory' etc. values
+        have been configured manually).
         """
         assert not 'directory' in self.env.config
         root = self.app.root_path
@@ -67,17 +68,10 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         self.app.static_folder = '/'
         assert get_all_bundle_files(Bundle('foo'), self.env) == ['/foo']
 
-    def test_directory_custom(self):
-        """A custom root directory is configured."""
-        self.env.load_path = [self.tempdir]
-        self.create_files(['foo', 'module/bar'])
-        print get_all_bundle_files(Bundle('foo'), self.env)
-        assert get_all_bundle_files(Bundle('foo'), self.env) == [self.path('foo')]
-        # We do not recognize references to modules.
-        assert get_all_bundle_files(Bundle('module/bar'), self.env) == [self.path('module/bar')]
-
     def test_url_auto(self):
-        """Test how urls are generated if no 'url' is configured manually.
+        """Test how urls are generated via the Flask static system
+        by default (if no custom 'env.url' etc. values have been
+        configured manually).
         """
         assert not 'url' in self.env.config
 
@@ -92,12 +86,35 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         from flask import _request_ctx_stack
         assert _request_ctx_stack.top is None
 
-    def test_url_custom(self):
-        """A custom root url is configured."""
-        self.env.url = '/media'
-        assert Bundle('foo').urls(self.env) == ['/media/foo']
+    def test_custom_load_path(self):
+        """A custom load_path is configured - this will affect how
+        we deal with source files.
+        """
+        self.env.append_path(self.tempdir, '/custom/')
+        self.create_files(['foo', 'module/bar'])
+        assert get_all_bundle_files(Bundle('foo'), self.env) == [self.path('foo')]
         # We do not recognize references to modules.
-        assert Bundle('module/bar').urls(self.env) == ['/media/module/bar']
+        assert get_all_bundle_files(Bundle('module/bar'), self.env) == [self.path('module/bar')]
+
+        assert Bundle('foo').urls(self.env) == ['/custom/foo']
+        assert Bundle('module/bar').urls(self.env) == ['/custom/module/bar']
+
+    def test_custom_directory_and_url(self):
+        """Custom directory/url are configured - this will affect how
+        we deal with output files."""
+        # Create source source file, make it findable (by default,
+        # static_folder) is set to a fixed subfolder of the test dir (why?)
+        self.create_files({'a': ''})
+        self.app.static_folder = self.tempdir
+        # Setup custom directory/url pair for output
+        self.env.directory = self.tempdir
+        self.env.url = '/custom'
+        self.env.debug = False   # Return build urls
+        self.env.expire = False  # No query strings
+
+        assert Bundle('a', output='foo').urls(self.env) == ['/custom/foo']
+        # We do not recognize references to modules.
+        assert Bundle('a', output='module/bar').urls(self.env) == ['/custom/module/bar']
 
     def test_existing_request_object_used(self):
         """[Regression] Check for a bug where the url generation code of
