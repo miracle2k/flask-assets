@@ -1,3 +1,12 @@
+0.8 (2012-11-23)
+    This release is compatible with webassets 0.8.
+
+    - Flask-Script's ``build`` command now has ``--parse-templates`` option.
+    - ``Environment`` class now has ``from_yaml`` and ``from_module``
+      shortcuts (Sean Lynch).
+    - Jinja2 filter uses the Flask template environment.
+    - Fixed PySscss filter.
+
 0.7 (2012-04-11)
     This release is compatible with webassets 0.7.
 

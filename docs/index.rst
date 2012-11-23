@@ -144,6 +144,27 @@ configuration. The following two statements are equivalent:
 For a list of available settings, see the full
 :ref:`webassets documentation <webassets:environment-configuration>`.
 
+Babel Configuration
+~~~~~~~~~~~~~~~~~~~
+
+If you use `Babel`_ for internationalization, then you will need to
+add the extension to your babel configuration file
+as ``webassets.ext.jinja2.AssetsExtension``
+
+Otherwise, babel will not extract strings from any templates that
+include an ``assets`` tag.
+
+Here is an example ``babel.cfg``:
+
+.. code-block:: python
+
+    [python: **.py]
+    [jinja2: **.html]
+    extensions=jinja2.ext.autoescape,jinja2.ext.with_,webassets.ext.jinja2.AssetsExtension
+
+
+.. _Babel: http://babel.edgewall.org/
+
 
 Management Command
 ------------------
@@ -153,12 +174,12 @@ as ``flaskext.assets.ManageAssets``:
 
 .. code-block:: python
 
-    from flaskext.assets import ManageAssets
+    from flask.ext.assets import ManageAssets
     manager = Manager(app)
     manager.add_command("assets", ManageAssets(assets_env))
 
-You can explicitly pass the ``assets_env`` when adding the comm`and as above.
-Alternatively, ``ManageAssets`` will import the ``current_app` from Flask and
+You can explicitly pass the ``assets_env`` when adding the command as above.
+Alternatively, ``ManageAssets`` will import the ``current_app`` from Flask and
 use the ``jinja_env``.
 
 The command allows you to do things like rebuilding bundles from the

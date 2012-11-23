@@ -37,7 +37,6 @@ class TempEnvironmentHelper(BaseTempEnvironmentHelper):
         return self.env
 
 
-
 try:
     from test.test_support import check_warnings
 except ImportError:
