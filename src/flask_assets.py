@@ -20,7 +20,7 @@ from webassets import Bundle
 
 
 class Jinja2Filter(Filter):
-    """Will compile all source files as Jinja2 temlates using the standard
+    """Will compile all source files as Jinja2 templates using the standard
     Flask contexts.
     """
     name = 'jinja2'
