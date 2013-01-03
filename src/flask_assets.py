@@ -145,16 +145,19 @@ class FlaskResolver(Resolver):
             if hasattr(self.env._app, 'blueprints'):
                 blueprint, name = item.split('/', 1)
                 directory = get_static_folder(self.env._app.blueprints[blueprint])
+                endpoint = '%s.static' % blueprint
                 item = name
             else:
                 # Module support for Flask < 0.7
                 module, name = item.split('/', 1)
                 directory = get_static_folder(self.env._app.modules[module])
+                endpoint = '%s.static' % module
                 item = name
         except (ValueError, KeyError):
             directory = get_static_folder(self.env._app)
+            endpoint = 'static'
 
-        return directory, item
+        return directory, item, endpoint
 
     @property
     def use_webassets_system_for_output(self):
@@ -174,7 +177,7 @@ class FlaskResolver(Resolver):
             return Resolver.search_for_source(self, item)
 
         # Look in correct blueprint's directory
-        directory, item = self.split_prefix(item)
+        directory, item, endpoint = self.split_prefix(item)
         try:
             return self.consider_single_directory(directory, item)
         except IOError:
@@ -188,7 +191,7 @@ class FlaskResolver(Resolver):
             return Resolver.resolve_output_to_path(self, target, bundle)
 
         # Allow targeting blueprint static folders
-        directory, rel_path = self.split_prefix(target)
+        directory, rel_path, endpoint = self.split_prefix(target)
         return path.normpath(path.join(directory, rel_path))
 
     def resolve_source_to_url(self, filepath, item):
@@ -196,24 +199,12 @@ class FlaskResolver(Resolver):
         if self.use_webassets_system_for_sources:
             return super(FlaskResolver, self).resolve_source_to_url(filepath, item)
 
-        filename = item
-        if hasattr(self.env._app, 'blueprints'):
-            try:
-                blueprint, name = item.split('/', 1)
-                self.env._app.blueprints[blueprint]  # keyerror if no module
-                endpoint = '%s.static' % blueprint
-                filename = name
-            except (ValueError, KeyError):
-                endpoint = 'static'
+        directory, rel_path, endpoint = self.split_prefix(item)
+
+        if filepath is not None:
+            filename = filepath[len(directory)+1:]
         else:
-            # Module support for Flask < 0.7
-            try:
-                module, name = item.split('/', 1)
-                self.env._app.modules[module]  # keyerror if no module
-                endpoint = '%s.static' % module
-                filename = name
-            except (ValueError, KeyError):
-                endpoint = '.static'
+            filename = item
 
         ctx = None
         if not _request_ctx_stack.top:
