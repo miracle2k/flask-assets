@@ -99,6 +99,12 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         assert Bundle('foo').urls(self.env) == ['/custom/foo']
         assert Bundle('module/bar').urls(self.env) == ['/custom/module/bar']
 
+        # [Regression] With a load path configured, generating output
+        # urls still works, and it still uses the flask system.
+        self.env.debug = False
+        self.env.url_expire = False
+        assert Bundle('foo', output='out').urls(self.env) == ['/app_static/out']
+
     def test_custom_directory_and_url(self):
         """Custom directory/url are configured - this will affect how
         we deal with output files."""

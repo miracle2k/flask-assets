@@ -196,6 +196,22 @@ class FlaskResolver(Resolver):
         if self.use_webassets_system_for_sources:
             return super(FlaskResolver, self).resolve_source_to_url(filepath, item)
 
+        return self.convert_item_to_flask_url(item)
+
+    def resolve_output_to_url(self, target):
+        # With a directory/url pair set, use it for output files.
+        if self.use_webassets_system_for_output:
+            return Resolver.resolve_output_to_url(self, target)
+
+        # Otherwise, behaves like all other flask URLs.
+        return self.convert_item_to_flask_url(target)
+
+    def convert_item_to_flask_url(self, item):
+        """Given a relative reference like `foo/bar.css`, returns
+        the Flask static url. By doing so it takes into account
+        blueprints, i.e. in the aformentioned example,
+        ``foo`` may reference a blueprint.
+        """
         filename = item
         if hasattr(self.env._app, 'blueprints'):
             try:
@@ -224,14 +240,6 @@ class FlaskResolver(Resolver):
         finally:
             if ctx:
                 ctx.pop()
-
-    def resolve_output_to_url(self, target):
-        # With a directory/url pair set, use it for output files.
-        if self.use_webassets_system_for_output:
-            return Resolver.resolve_output_to_url(self, target)
-
-        # Otherwise, behaves like generating urls to a source file.
-        return self.resolve_source_to_url(None, target)
 
 
 class Environment(BaseEnvironment):
