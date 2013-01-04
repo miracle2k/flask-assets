@@ -214,13 +214,17 @@ class FlaskResolver(Resolver):
         the Flask static url. By doing so it takes into account
         blueprints, i.e. in the aformentioned example,
         ``foo`` may reference a blueprint.
+
+        If an absolute path is given via ``filepath``, it will be
+        used instead. This is needed because ``item`` may be a
+        glob instruction that was resolved to multiple files.
         """
         directory, rel_path, endpoint = self.split_prefix(item)
 
         if filepath is not None:
             filename = filepath[len(directory)+1:]
         else:
-            filename = item
+            filename = rel_path
 
         ctx = None
         if not _request_ctx_stack.top:

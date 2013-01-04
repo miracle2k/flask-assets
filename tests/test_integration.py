@@ -135,6 +135,13 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
                   '/', environ_overrides={'SCRIPT_NAME': '/yourapp'}):
             assert Bundle('foo').urls(self.env) == ['/yourapp/app_static/foo']
 
+    def test_glob(self):
+        """Make sure url generation works with globs."""
+        self.app.static_folder = self.tempdir
+        self.create_files({'a.js': 'foo', 'b.js': 'bar'})
+        assert self.mkbundle('*.js').urls(self.env) == [
+            '/app_static/a.js', '/app_static/b.js']
+
 
 class TestUrlAndDirectoryWithInitApp(object):
     """[Regression] Make sure the automatic "directory" and "url"
@@ -208,6 +215,19 @@ class TestBlueprints(TempEnvironmentHelper):
         self.make_blueprint('module', static_folder=module_static_dir)
         self.mkbundle('foo', filters='rjsmin', output='module/out').build()
         assert self.get('module-static/out') == 'function bla(){var a;}'
+
+    def test_blueprint_urls(self):
+        """Urls to blueprint files are generated correctly."""
+        self.make_blueprint('module', static_folder='static',
+                            static_url_path='/rasputin')
+
+        # source urls
+        assert self.mkbundle('module/foo').urls() == ['/rasputin/foo']
+
+        # output urls - env settings are to not touch filesystem
+        self.env.auto_build = False
+        self.env.expire = False
+        assert self.mkbundle(output='module/out', debug=False).urls() == ['/rasputin/out']
 
     def test_cssrewrite(self):
         """Make sure cssrewrite works with Blueprints.
