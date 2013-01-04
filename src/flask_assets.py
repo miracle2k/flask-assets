@@ -113,9 +113,16 @@ def get_static_folder(app_or_blueprint):
     In newer Flask versions this can be customized, in older
     ones (<=0.6) the folder is fixed.
     """
-    if hasattr(app_or_blueprint, 'static_folder'):
-        return app_or_blueprint.static_folder
-    return path.join(app_or_blueprint.root_path, 'static')
+    if not hasattr(app_or_blueprint, 'static_folder'):
+        # I believe this is for app objects in very old Flask
+        # versions that did not support ccustom static folders.
+        return path.join(app_or_blueprint.root_path, 'static')
+
+    if not app_or_blueprint.has_static_folder:
+        # Use an exception type here that is not hidden by spit_prefix.
+        raise TypeError(('The referenced blueprint %s has no static '
+                         'folder.') % app_or_blueprint)
+    return app_or_blueprint.static_folder
 
 
 class FlaskResolver(Resolver):

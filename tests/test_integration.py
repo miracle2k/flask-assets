@@ -229,6 +229,11 @@ class TestBlueprints(TempEnvironmentHelper):
         self.env.expire = False
         assert self.mkbundle(output='module/out', debug=False).urls() == ['/rasputin/out']
 
+    def test_blueprint_no_static_folder(self):
+        """Test dealing with a blueprint without a static folder."""
+        self.make_blueprint('module')
+        assert_raises(TypeError, self.mkbundle('module/foo').urls)
+
     def test_cssrewrite(self):
         """Make sure cssrewrite works with Blueprints.
         """
