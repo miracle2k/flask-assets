@@ -23,7 +23,7 @@ sys.path.append(os.path.abspath('_themes'))
 
 # make sure we are documenting the local version with autodoc
 sys.path.insert(0, os.path.abspath('../src'))
-from flask.ext import assets as flaskassets
+import flask_assets as flaskassets
 
 
 # -- General configuration -----------------------------------------------------
