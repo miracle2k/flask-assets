@@ -1,5 +1,5 @@
 nose
 Flask
 Flask-Script
-webassets
+webasset==0.8
 PyYAML
