@@ -262,6 +262,8 @@ class Environment(BaseEnvironment):
         """
         if self.app is not None:
             return self.app
+        elif hasattr(self, '_app_from_init_app'):
+            return self._app_from_init_app
         else:
             ctx = _request_ctx_stack.top
             if ctx is not None:
@@ -287,6 +289,8 @@ class Environment(BaseEnvironment):
     """)
 
     def init_app(self, app):
+        if not self.app:
+            self._app_from_init_app = app
         app.jinja_env.add_extension('webassets.ext.jinja2.AssetsExtension')
         app.jinja_env.assets_environment = self
 
