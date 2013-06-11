@@ -145,46 +145,45 @@ class FlaskResolver(Resolver):
     are no longer resolved.
     """
 
-    def split_prefix(self, item):
+    def split_prefix(self, ctx, item):
         """See if ``item`` has blueprint prefix, return (directory, rel_path).
         """
+        env = ctx.environment
         try:
-            if hasattr(self.env._app, 'blueprints'):
+            if hasattr(env._app, 'blueprints'):
                 blueprint, name = item.split('/', 1)
-                directory = get_static_folder(self.env._app.blueprints[blueprint])
+                directory = get_static_folder(env._app.blueprints[blueprint])
                 endpoint = '%s.static' % blueprint
                 item = name
             else:
                 # Module support for Flask < 0.7
                 module, name = item.split('/', 1)
-                directory = get_static_folder(self.env._app.modules[module])
+                directory = get_static_folder(env._app.modules[module])
                 endpoint = '%s.static' % module
                 item = name
         except (ValueError, KeyError):
-            directory = get_static_folder(self.env._app)
+            directory = get_static_folder(env._app)
             endpoint = 'static'
 
         return directory, item, endpoint
 
-    @property
-    def use_webassets_system_for_output(self):
-        return self.env.config.get('directory') is not None or \
-               self.env.config.get('url') is not None
+    def use_webassets_system_for_output(self, ctx):
+        return ctx.get('directory') is not None or \
+               ctx.get('url') is not None
 
-    @property
-    def use_webassets_system_for_sources(self):
-        return bool(self.env.load_path)
+    def use_webassets_system_for_sources(self, ctx):
+        return bool(ctx.load_path)
 
-    def search_for_source(self, item):
+    def search_for_source(self, ctx, item):
         # If a load_path is set, use it instead of the Flask static system.
         #
         # Note: With only env.directory set, we don't go to default;
         # Setting env.directory only makes the output directory fixed.
-        if self.use_webassets_system_for_sources:
+        if self.use_webassets_system_for_sources(ctx):
             return Resolver.search_for_source(self, item)
 
         # Look in correct blueprint's directory
-        directory, item, endpoint = self.split_prefix(item)
+        directory, item, endpoint = self.split_prefix(ctx, item)
         try:
             return self.consider_single_directory(directory, item)
         except IOError:
@@ -192,31 +191,31 @@ class FlaskResolver(Resolver):
             # expect an IOError upon missing files. They need to be rewritten.
             return path.normpath(path.join(directory, item))
 
-    def resolve_output_to_path(self, target, bundle):
+    def resolve_output_to_path(self, ctx, target, bundle):
         # If a directory/url pair is set, always use it for output files
-        if self.use_webassets_system_for_output:
-            return Resolver.resolve_output_to_path(self, target, bundle)
+        if self.use_webassets_system_for_output(ctx):
+            return Resolver.resolve_output_to_path(self, ctx, target, bundle)
 
         # Allow targeting blueprint static folders
-        directory, rel_path, endpoint = self.split_prefix(target)
+        directory, rel_path, endpoint = self.split_prefix(ctx, target)
         return path.normpath(path.join(directory, rel_path))
 
-    def resolve_source_to_url(self, filepath, item):
+    def resolve_source_to_url(self, ctx, filepath, item):
         # If a load path is set, use it instead of the Flask static system.
-        if self.use_webassets_system_for_sources:
-            return super(FlaskResolver, self).resolve_source_to_url(filepath, item)
+        if self.use_webassets_system_for_sources(ctx):
+            return super(FlaskResolver, self).resolve_source_to_url(ctx, filepath, item)
 
-        return self.convert_item_to_flask_url(item, filepath)
+        return self.convert_item_to_flask_url(ctx, item, filepath)
 
-    def resolve_output_to_url(self, target):
+    def resolve_output_to_url(self, ctx, target):
         # With a directory/url pair set, use it for output files.
-        if self.use_webassets_system_for_output:
-            return Resolver.resolve_output_to_url(self, target)
+        if self.use_webassets_system_for_output(ctx):
+            return Resolver.resolve_output_to_url(self, ctx, target)
 
         # Otherwise, behaves like all other flask URLs.
-        return self.convert_item_to_flask_url(target)
+        return self.convert_item_to_flask_url(ctx, target)
 
-    def convert_item_to_flask_url(self, item, filepath=None):
+    def convert_item_to_flask_url(self, ctx, item, filepath=None):
         """Given a relative reference like `foo/bar.css`, returns
         the Flask static url. By doing so it takes into account
         blueprints, i.e. in the aformentioned example,
@@ -226,7 +225,7 @@ class FlaskResolver(Resolver):
         used instead. This is needed because ``item`` may be a
         glob instruction that was resolved to multiple files.
         """
-        directory, rel_path, endpoint = self.split_prefix(item)
+        directory, rel_path, endpoint = self.split_prefix(ctx, item)
 
         if filepath is not None:
             filename = filepath[len(directory)+1:]
@@ -235,7 +234,7 @@ class FlaskResolver(Resolver):
 
         ctx = None
         if not _request_ctx_stack.top:
-            ctx = self.env._app.test_request_context()
+            ctx = ctx.environment._app.test_request_context()
             ctx.push()
         try:
             return url_for(endpoint, filename=filename)
