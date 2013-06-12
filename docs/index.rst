@@ -165,6 +165,20 @@ Here is an example ``babel.cfg``:
 
 .. _Babel: http://babel.edgewall.org/
 
+Flask-S3 Configuration
+~~~~~~~~~~~~~~~~~~~~~~~
+
+`Flask-S3`_ allows you to upload and serve your static files from 
+an Amazon S3 bucket. It accomplishes this by overwriting the Flask 
+``url_for`` function. In order for Flask-Assets to use this 
+overwritten ``url_for`` function, you need to let it know that 
+you are using Flask-S3. Just set
+
+.. code-block:: python
+
+    app.config['FLASK_ASSETS_USE_S3']=True
+
+.. _Flask-S3: https://flask-s3.readthedocs.org/en/v0.1.4/
 
 Management Command
 ------------------
