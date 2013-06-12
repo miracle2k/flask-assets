@@ -1,6 +1,6 @@
 from __future__ import with_statement
 from os import path
-from flask import _request_ctx_stack, url_for
+from flask import _request_ctx_stack
 from flask.templating import render_template_string
 from webassets.env import (\
     BaseEnvironment, ConfigStorage, env_options, Resolver, url_prefix_join)
@@ -225,7 +225,20 @@ class FlaskResolver(Resolver):
         If an absolute path is given via ``filepath``, it will be
         used instead. This is needed because ``item`` may be a
         glob instruction that was resolved to multiple files.
+
+        If app.config("FLASK_ASSETS_USE_S3") exists and is True
+        then we import the url_for function from flask.ext.s3,
+        otherwise we import url_for from flask directly.
         """
+        if self.env._app.config.get("FLASK_ASSETS_USE_S3"):
+            try:
+                from flask.ext.s3 import url_for
+            except ImportError as e:
+                print "You must have Flask S3 to use FLASK_ASSETS_USE_S3 option"
+                raise e
+        else:
+            from flask import url_for
+
         directory, rel_path, endpoint = self.split_prefix(item)
 
         if filepath is not None:
