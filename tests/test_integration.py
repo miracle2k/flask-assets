@@ -116,7 +116,7 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         self.env.directory = self.tempdir
         self.env.url = '/custom'
         self.env.debug = False   # Return build urls
-        self.env.expire = False  # No query strings
+        self.env.url_expire = False  # No query strings
 
         assert Bundle('a', output='foo').urls(self.env) == ['/custom/foo']
         # We do not recognize references to modules.
@@ -226,7 +226,7 @@ class TestBlueprints(TempEnvironmentHelper):
 
         # output urls - env settings are to not touch filesystem
         self.env.auto_build = False
-        self.env.expire = False
+        self.env.url_expire = False
         assert self.mkbundle(output='module/out', debug=False).urls() == ['/rasputin/out']
 
     def test_blueprint_no_static_folder(self):
