@@ -139,7 +139,7 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         """Make sure url generation works with globs."""
         self.app.static_folder = self.tempdir
         self.create_files({'a.js': 'foo', 'b.js': 'bar'})
-        assert self.mkbundle('*.js').urls(self.env) == [
+        assert list(sorted(self.mkbundle('*.js').urls(self.env))) == [
             '/app_static/a.js', '/app_static/b.js']
 
 
