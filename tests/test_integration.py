@@ -116,7 +116,7 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         self.env.directory = self.tempdir
         self.env.url = '/custom'
         self.env.debug = False   # Return build urls
-        self.env.expire = False  # No query strings
+        self.env.url_expire = False  # No query strings
 
         assert Bundle('a', output='foo').urls(self.env) == ['/custom/foo']
         # We do not recognize references to modules.
@@ -139,7 +139,7 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         """Make sure url generation works with globs."""
         self.app.static_folder = self.tempdir
         self.create_files({'a.js': 'foo', 'b.js': 'bar'})
-        assert self.mkbundle('*.js').urls(self.env) == [
+        assert list(sorted(self.mkbundle('*.js').urls(self.env))) == [
             '/app_static/a.js', '/app_static/b.js']
 
 
@@ -226,7 +226,7 @@ class TestBlueprints(TempEnvironmentHelper):
 
         # output urls - env settings are to not touch filesystem
         self.env.auto_build = False
-        self.env.expire = False
+        self.env.url_expire = False
         assert self.mkbundle(output='module/out', debug=False).urls() == ['/rasputin/out']
 
     def test_blueprint_no_static_folder(self):
