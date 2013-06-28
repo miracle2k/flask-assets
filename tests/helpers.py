@@ -1,10 +1,4 @@
-from nose import SkipTest
-from nose.tools import assert_raises
 from flask.app import Flask
-try:
-    from flask import __version__ as FLASK_VERSION
-except ImportError:
-    FLASK_VERSION = '0.6'
 from webassets.test import TempEnvironmentHelper as BaseTempEnvironmentHelper
 from flask.ext.assets import Environment
 
@@ -24,13 +18,6 @@ __all__ = ('TempEnvironmentHelper', 'Module', 'Blueprint')
 class TempEnvironmentHelper(BaseTempEnvironmentHelper):
 
     def _create_environment(self, **kwargs):
-        if FLASK_VERSION < '0.7':
-            # Older Flask versions do not support the
-            # static_folder argument, which we need to use
-            # a temporary folder for static files, without
-            # having to do sys.path hacking.
-            raise SkipTest()
-
         if not hasattr(self, 'app'):
             self.app = Flask(__name__, static_folder=self.tempdir, **kwargs)
         self.env = Environment(self.app)
