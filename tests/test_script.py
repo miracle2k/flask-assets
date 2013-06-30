@@ -8,7 +8,7 @@ from webassets.script import GenericArgparseImplementation
 from helpers import TempEnvironmentHelper
 
 try:
-    from flaskext.script import Manager
+    from flask.ext.script import Manager
 except:
     raise SkipTest()
 
