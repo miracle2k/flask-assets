@@ -18,8 +18,7 @@ from setuptools import setup
 def parse_version(asignee):
     import os, re
     here = os.path.dirname(os.path.abspath(__file__))
-    version_re = re.compile(
-        r'__version__ = (\(.*?\))')
+    version_re = re.compile(r'^%s = (\(.*?\))' % asignee)
     with open(os.path.join(here, 'src', 'flask_assets.py')) as fp:
         for line in fp:
             match = version_re.search(line)
