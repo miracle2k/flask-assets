@@ -275,10 +275,19 @@ class Environment(BaseEnvironment):
         """
         if self.app is not None:
             return self.app
-        else:
-            ctx = _request_ctx_stack.top
-            if ctx is not None:
-                return ctx.app
+
+        ctx = _request_ctx_stack.top
+        if ctx is not None:
+            return ctx.app
+
+        try:
+            from flask import _app_ctx_stack
+            app_ctx = _app_ctx_stack.top
+            if app_ctx is not None:
+                return app_ctx.app
+        except ImportError:
+            pass
+
         raise RuntimeError('assets instance not bound to an application, '+
                             'and no application in current context')
 
