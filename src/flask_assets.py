@@ -24,6 +24,7 @@ class Jinja2Filter(Filter):
     Flask contexts.
     """
     name = 'jinja2'
+    max_debug_level = None
 
     def __init__(self, context=None):
         super(Jinja2Filter, self).__init__()
