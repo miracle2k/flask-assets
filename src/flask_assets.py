@@ -1,4 +1,4 @@
-from __future__ import with_statement
+from __future__ import print_function
 from os import path
 from flask import _request_ctx_stack
 from flask.templating import render_template_string
@@ -234,7 +234,7 @@ class FlaskResolver(Resolver):
             try:
                 from flask.ext.s3 import url_for
             except ImportError as e:
-                print "You must have Flask S3 to use FLASK_ASSETS_USE_S3 option"
+                print("You must have Flask S3 to use FLASK_ASSETS_USE_S3 option")
                 raise e
         else:
             from flask import url_for
@@ -315,12 +315,14 @@ class Environment(BaseEnvironment):
     def from_yaml(self, path):
         """Register bundles from a YAML configuration file"""
         bundles = YAMLLoader(path).load_bundles()
-        [self.register(name, bundle) for name, bundle in bundles.iteritems()]
+        for name in bundles:
+            self.register(name, bundles[name])
 
     def from_module(self, path):
         """Register bundles from a Python module"""
         bundles = PythonLoader(path).load_bundles()
-        [self.register(name, bundle) for name, bundle in bundles.iteritems()]
+        for name in bundles:
+            self.register(name, bundles[name])
 
 try:
     from flask.ext import script
