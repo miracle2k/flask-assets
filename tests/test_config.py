@@ -1,8 +1,8 @@
 """The Environment configuration is hooked up to the Flask config dict.
 """
 
-from __future__ import with_statement
-from helpers import check_warnings
+from __future__ import absolute_import
+from tests.helpers import check_warnings
 
 from nose.tools import assert_raises
 from flask import Flask

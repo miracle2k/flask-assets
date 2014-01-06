@@ -1,11 +1,11 @@
-from __future__ import with_statement
+from __future__ import absolute_import
 
 import sys
 from nose import SkipTest
 from flask import Flask
 from flask.ext.assets import Environment, ManageAssets
 from webassets.script import GenericArgparseImplementation
-from helpers import TempEnvironmentHelper
+from tests.helpers import TempEnvironmentHelper
 
 try:
     from flaskext.script import Manager
@@ -80,4 +80,4 @@ class TestScript(TempEnvironmentHelper):
         mgmt.handle('test', 'assets', ['--parse-templates', 'build'])
 
         assert self.exists('output')
-        
+

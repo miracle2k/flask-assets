@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 from nose.tools import assert_raises
 from nose import SkipTest
-from helpers import TempEnvironmentHelper
+from tests.helpers import TempEnvironmentHelper
 
 
 class TestFilters(TempEnvironmentHelper):

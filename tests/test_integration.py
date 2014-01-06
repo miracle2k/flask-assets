@@ -1,10 +1,10 @@
-from __future__ import with_statement
+from __future__ import absolute_import
 from nose.tools import assert_raises
 
 from flask import Flask
 from flask.ext.assets import Environment, Bundle
 from webassets.bundle import get_all_bundle_files
-from helpers import TempEnvironmentHelper, Module, Blueprint
+from tests.helpers import TempEnvironmentHelper, Module, Blueprint
 
 
 def test_import():
@@ -29,7 +29,7 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         TempEnvironmentHelper.setup(self)
 
         self.app = Flask(__name__, static_path='/app_static')
-        import test_module
+        from tests import test_module
         if not Blueprint:
             self.module = Module(test_module.__name__, name='module',
                                  static_path='/mod_static')
@@ -197,7 +197,7 @@ class TestBlueprints(TempEnvironmentHelper):
 
     def make_blueprint(self, name='module', import_name=None, **kw):
         if not import_name:
-            import test_module
+            from tests import test_module
             import_name = test_module.__name__
 
         if not Blueprint:
