@@ -392,9 +392,6 @@ else:
             self.implementation = impl
             self.log = log
 
-        def create_parser(self, prog):
-            return CatchAllParser()
-
         def run(self, args):
             """Runs the management script.
             If ``self.env`` is not defined, it will import it from
