@@ -332,10 +332,6 @@ else:
     import argparse
     from webassets.script import GenericArgparseImplementation, CommandError
 
-    class CatchAllParser(object):
-        def parse_known_args(self, app_args):
-            return argparse.Namespace(), app_args
-
     class FlaskArgparseInterface(GenericArgparseImplementation):
         """Subclass the CLI implementation to add a --parse-templates option."""
 
