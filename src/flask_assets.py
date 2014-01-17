@@ -332,10 +332,6 @@ else:
     import argparse
     from webassets.script import GenericArgparseImplementation, CommandError
 
-    class CatchAllParser(object):
-        def parse_known_args(self, app_args):
-            return argparse.Namespace(), app_args
-
     class FlaskArgparseInterface(GenericArgparseImplementation):
         """Subclass the CLI implementation to add a --parse-templates option."""
 
@@ -391,9 +387,6 @@ else:
             self.env = assets_env
             self.implementation = impl
             self.log = log
-
-        def create_parser(self, prog):
-            return CatchAllParser()
 
         def run(self, args):
             """Runs the management script.
