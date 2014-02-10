@@ -263,7 +263,7 @@ class Environment(BaseEnvironment):
     resolver_class = FlaskResolver
 
     def __init__(self, app=None):
-        self.app = app
+        self.app = None
         super(Environment, self).__init__()
         if app:
             self.init_app(app)
@@ -309,6 +309,7 @@ class Environment(BaseEnvironment):
     """)
 
     def init_app(self, app):
+        self.app = app
         app.jinja_env.add_extension('webassets.ext.jinja2.AssetsExtension')
         app.jinja_env.assets_environment = self
 
