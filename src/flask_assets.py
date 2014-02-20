@@ -1,6 +1,6 @@
-from __future__ import with_statement
+from __future__ import print_function
 from os import path
-from flask import _request_ctx_stack, url_for
+from flask import _request_ctx_stack
 from flask.templating import render_template_string
 from webassets.env import (\
     BaseEnvironment, ConfigStorage, env_options, Resolver, url_prefix_join)
@@ -8,8 +8,8 @@ from webassets.filter import Filter, register_filter
 from webassets.loaders import PythonLoader, YAMLLoader
 
 
-__version__ = (0, 8)
-__webassets_version__ = ('0', '8') # webassets core compatibility. used in setup.py
+__version__ = (0, 9)
+__webassets_version__ = (0, 9)  # webassets core compatibility. used in setup.py
 
 
 __all__ = ('Environment', 'Bundle',)
@@ -20,7 +20,7 @@ from webassets import Bundle
 
 
 class Jinja2Filter(Filter):
-    """Will compile all source files as Jinja2 temlates using the standard
+    """Will compile all source files as Jinja2 templates using the standard
     Flask contexts.
     """
     name = 'jinja2'
@@ -113,9 +113,16 @@ def get_static_folder(app_or_blueprint):
     In newer Flask versions this can be customized, in older
     ones (<=0.6) the folder is fixed.
     """
-    if hasattr(app_or_blueprint, 'static_folder'):
-        return app_or_blueprint.static_folder
-    return path.join(app_or_blueprint.root_path, 'static')
+    if not hasattr(app_or_blueprint, 'static_folder'):
+        # I believe this is for app objects in very old Flask
+        # versions that did not support ccustom static folders.
+        return path.join(app_or_blueprint.root_path, 'static')
+
+    if not app_or_blueprint.has_static_folder:
+        # Use an exception type here that is not hidden by spit_prefix.
+        raise TypeError(('The referenced blueprint %s has no static '
+                         'folder.') % app_or_blueprint)
+    return app_or_blueprint.static_folder
 
 
 class FlaskResolver(Resolver):
@@ -145,16 +152,19 @@ class FlaskResolver(Resolver):
             if hasattr(self.env._app, 'blueprints'):
                 blueprint, name = item.split('/', 1)
                 directory = get_static_folder(self.env._app.blueprints[blueprint])
+                endpoint = '%s.static' % blueprint
                 item = name
             else:
                 # Module support for Flask < 0.7
                 module, name = item.split('/', 1)
                 directory = get_static_folder(self.env._app.modules[module])
+                endpoint = '%s.static' % module
                 item = name
         except (ValueError, KeyError):
             directory = get_static_folder(self.env._app)
+            endpoint = 'static'
 
-        return directory, item
+        return directory, item, endpoint
 
     @property
     def use_webassets_system_for_output(self):
@@ -174,7 +184,7 @@ class FlaskResolver(Resolver):
             return Resolver.search_for_source(self, item)
 
         # Look in correct blueprint's directory
-        directory, item = self.split_prefix(item)
+        directory, item, endpoint = self.split_prefix(item)
         try:
             return self.consider_single_directory(directory, item)
         except IOError:
@@ -188,7 +198,7 @@ class FlaskResolver(Resolver):
             return Resolver.resolve_output_to_path(self, target, bundle)
 
         # Allow targeting blueprint static folders
-        directory, rel_path = self.split_prefix(target)
+        directory, rel_path, endpoint = self.split_prefix(target)
         return path.normpath(path.join(directory, rel_path))
 
     def resolve_source_to_url(self, filepath, item):
@@ -196,24 +206,45 @@ class FlaskResolver(Resolver):
         if self.use_webassets_system_for_sources:
             return super(FlaskResolver, self).resolve_source_to_url(filepath, item)
 
-        filename = item
-        if hasattr(self.env._app, 'blueprints'):
+        return self.convert_item_to_flask_url(item, filepath)
+
+    def resolve_output_to_url(self, target):
+        # With a directory/url pair set, use it for output files.
+        if self.use_webassets_system_for_output:
+            return Resolver.resolve_output_to_url(self, target)
+
+        # Otherwise, behaves like all other flask URLs.
+        return self.convert_item_to_flask_url(target)
+
+    def convert_item_to_flask_url(self, item, filepath=None):
+        """Given a relative reference like `foo/bar.css`, returns
+        the Flask static url. By doing so it takes into account
+        blueprints, i.e. in the aformentioned example,
+        ``foo`` may reference a blueprint.
+
+        If an absolute path is given via ``filepath``, it will be
+        used instead. This is needed because ``item`` may be a
+        glob instruction that was resolved to multiple files.
+
+        If app.config("FLASK_ASSETS_USE_S3") exists and is True
+        then we import the url_for function from flask.ext.s3,
+        otherwise we import url_for from flask directly.
+        """
+        if self.env._app.config.get("FLASK_ASSETS_USE_S3"):
             try:
-                blueprint, name = item.split('/', 1)
-                self.env._app.blueprints[blueprint]  # keyerror if no module
-                endpoint = '%s.static' % blueprint
-                filename = name
-            except (ValueError, KeyError):
-                endpoint = 'static'
+                from flask.ext.s3 import url_for
+            except ImportError as e:
+                print("You must have Flask S3 to use FLASK_ASSETS_USE_S3 option")
+                raise e
         else:
-            # Module support for Flask < 0.7
-            try:
-                module, name = item.split('/', 1)
-                self.env._app.modules[module]  # keyerror if no module
-                endpoint = '%s.static' % module
-                filename = name
-            except (ValueError, KeyError):
-                endpoint = '.static'
+            from flask import url_for
+
+        directory, rel_path, endpoint = self.split_prefix(item)
+
+        if filepath is not None:
+            filename = filepath[len(directory)+1:]
+        else:
+            filename = rel_path
 
         ctx = None
         if not _request_ctx_stack.top:
@@ -224,14 +255,6 @@ class FlaskResolver(Resolver):
         finally:
             if ctx:
                 ctx.pop()
-
-    def resolve_output_to_url(self, target):
-        # With a directory/url pair set, use it for output files.
-        if self.use_webassets_system_for_output:
-            return Resolver.resolve_output_to_url(self, target)
-
-        # Otherwise, behaves like generating urls to a source file.
-        return self.resolve_source_to_url(None, target)
 
 
 class Environment(BaseEnvironment):
@@ -252,10 +275,19 @@ class Environment(BaseEnvironment):
         """
         if self.app is not None:
             return self.app
-        else:
-            ctx = _request_ctx_stack.top
-            if ctx is not None:
-                return ctx.app
+
+        ctx = _request_ctx_stack.top
+        if ctx is not None:
+            return ctx.app
+
+        try:
+            from flask import _app_ctx_stack
+            app_ctx = _app_ctx_stack.top
+            if app_ctx is not None:
+                return app_ctx.app
+        except ImportError:
+            pass
+
         raise RuntimeError('assets instance not bound to an application, '+
                             'and no application in current context')
 
@@ -283,12 +315,14 @@ class Environment(BaseEnvironment):
     def from_yaml(self, path):
         """Register bundles from a YAML configuration file"""
         bundles = YAMLLoader(path).load_bundles()
-        [self.register(name, bundle) for name, bundle in bundles.iteritems()]
+        for name in bundles:
+            self.register(name, bundles[name])
 
     def from_module(self, path):
         """Register bundles from a Python module"""
         bundles = PythonLoader(path).load_bundles()
-        [self.register(name, bundle) for name, bundle in bundles.iteritems()]
+        for name in bundles:
+            self.register(name, bundles[name])
 
 try:
     from flask.ext import script
@@ -297,10 +331,6 @@ except ImportError:
 else:
     import argparse
     from webassets.script import GenericArgparseImplementation, CommandError
-
-    class CatchAllParser(object):
-        def parse_known_args(self, app_args):
-            return argparse.Namespace(), app_args
 
     class FlaskArgparseInterface(GenericArgparseImplementation):
         """Subclass the CLI implementation to add a --parse-templates option."""
@@ -357,9 +387,6 @@ else:
             self.env = assets_env
             self.implementation = impl
             self.log = log
-
-        def create_parser(self, prog):
-            return CatchAllParser()
 
         def run(self, args):
             """Runs the management script.

@@ -1,10 +1,10 @@
-from __future__ import with_statement
+from __future__ import absolute_import
 from nose.tools import assert_raises
 
 from flask import Flask
 from flask.ext.assets import Environment, Bundle
 from webassets.bundle import get_all_bundle_files
-from helpers import TempEnvironmentHelper, Module, Blueprint
+from tests.helpers import TempEnvironmentHelper, Module, Blueprint
 
 
 def test_import():
@@ -29,7 +29,7 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         TempEnvironmentHelper.setup(self)
 
         self.app = Flask(__name__, static_path='/app_static')
-        import test_module
+        from tests import test_module
         if not Blueprint:
             self.module = Module(test_module.__name__, name='module',
                                  static_path='/mod_static')
@@ -99,6 +99,12 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         assert Bundle('foo').urls(self.env) == ['/custom/foo']
         assert Bundle('module/bar').urls(self.env) == ['/custom/module/bar']
 
+        # [Regression] With a load path configured, generating output
+        # urls still works, and it still uses the flask system.
+        self.env.debug = False
+        self.env.url_expire = False
+        assert Bundle('foo', output='out').urls(self.env) == ['/app_static/out']
+
     def test_custom_directory_and_url(self):
         """Custom directory/url are configured - this will affect how
         we deal with output files."""
@@ -110,7 +116,7 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         self.env.directory = self.tempdir
         self.env.url = '/custom'
         self.env.debug = False   # Return build urls
-        self.env.expire = False  # No query strings
+        self.env.url_expire = False  # No query strings
 
         assert Bundle('a', output='foo').urls(self.env) == ['/custom/foo']
         # We do not recognize references to modules.
@@ -128,6 +134,13 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         with self.app.test_request_context(
                   '/', environ_overrides={'SCRIPT_NAME': '/yourapp'}):
             assert Bundle('foo').urls(self.env) == ['/yourapp/app_static/foo']
+
+    def test_glob(self):
+        """Make sure url generation works with globs."""
+        self.app.static_folder = self.tempdir
+        self.create_files({'a.js': 'foo', 'b.js': 'bar'})
+        assert list(sorted(self.mkbundle('*.js').urls(self.env))) == [
+            '/app_static/a.js', '/app_static/b.js']
 
 
 class TestUrlAndDirectoryWithInitApp(object):
@@ -184,7 +197,7 @@ class TestBlueprints(TempEnvironmentHelper):
 
     def make_blueprint(self, name='module', import_name=None, **kw):
         if not import_name:
-            import test_module
+            from tests import test_module
             import_name = test_module.__name__
 
         if not Blueprint:
@@ -202,6 +215,24 @@ class TestBlueprints(TempEnvironmentHelper):
         self.make_blueprint('module', static_folder=module_static_dir)
         self.mkbundle('foo', filters='rjsmin', output='module/out').build()
         assert self.get('module-static/out') == 'function bla(){var a;}'
+
+    def test_blueprint_urls(self):
+        """Urls to blueprint files are generated correctly."""
+        self.make_blueprint('module', static_folder='static',
+                            static_url_path='/rasputin')
+
+        # source urls
+        assert self.mkbundle('module/foo').urls() == ['/rasputin/foo']
+
+        # output urls - env settings are to not touch filesystem
+        self.env.auto_build = False
+        self.env.url_expire = False
+        assert self.mkbundle(output='module/out', debug=False).urls() == ['/rasputin/out']
+
+    def test_blueprint_no_static_folder(self):
+        """Test dealing with a blueprint without a static folder."""
+        self.make_blueprint('module')
+        assert_raises(TypeError, self.mkbundle('module/foo').urls)
 
     def test_cssrewrite(self):
         """Make sure cssrewrite works with Blueprints.

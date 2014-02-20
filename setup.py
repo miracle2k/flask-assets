@@ -19,7 +19,7 @@ def parse_version(asignee):
     import os, re
     here = os.path.dirname(os.path.abspath(__file__))
     version_re = re.compile(
-        r'__version__ = (\(.*?\))')
+        r'%s = (\(.*?\))' % asignee)
     with open(os.path.join(here, 'src', 'flask_assets.py')) as fp:
         for line in fp:
             match = version_re.search(line)
@@ -56,6 +56,8 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
