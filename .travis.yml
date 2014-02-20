@@ -1,14 +1,21 @@
 language: python
 python:
   - 2.6
-install: pip install tox
-# List envs explicitly to skip PyPy
-script: tox -e py26_flask08,py27_flask08,py33_flask010
+  - 2.7
+  - 3.3
+  - pypy
+env:
+  - FLASK=0.8
+  - FLASK=0.9
+  - FLASK=0.10
+install:
+  - pip install Flask==$FLASK --use-mirrors
+  - pip install -r requirements-dev.pip --use-mirrors
+script:
+  - nosetests tests
 notifications:
   email:
     - michael@elsdoerfer.com
 branches:
   only:
     - master
-
-
