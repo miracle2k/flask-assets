@@ -340,6 +340,9 @@ else:
             super(FlaskArgparseInterface, self).\
                 _construct_parser(*a, **kw)
             self.parser.add_argument(
+                '--jinja-extension', default='*.html',
+                help='specify the glob pattern for Jinja extensions (default: *.html)')
+            self.parser.add_argument(
                 '--parse-templates', action='store_true',
                 help='search project templates to find bundles')
 
@@ -351,7 +354,7 @@ else:
                     # Note that we exclude container bundles. By their very nature,
                     # they are guaranteed to have been created by solely referencing
                     # other bundles which are already registered.
-                    env.add(*[b for b in self.load_from_templates(env)
+                    env.add(*[b for b in self.load_from_templates(env, ns.jinja_extension)
                                     if not b.is_container])
 
                 if not len(env):
@@ -362,7 +365,7 @@ else:
                         '--parse-templates option.')
             return env
 
-        def load_from_templates(self, env):
+        def load_from_templates(self, env, jinja_extension):
             from webassets.ext.jinja2 import Jinja2Loader, AssetsExtension
             from flask import current_app as app
 
@@ -377,7 +380,8 @@ else:
                 template_dirs.append(
                     path.join(blueprint.root_path, blueprint.template_folder))
 
-            return Jinja2Loader(env, template_dirs, [jinja2_env]).load_bundles()
+            return Jinja2Loader(env, template_dirs, [jinja2_env], jinja_ext=jinja_extension).\
+                load_bundles()
 
     class ManageAssets(script.Command):
         """Manage assets."""
