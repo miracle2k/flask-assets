@@ -9,7 +9,7 @@ from webassets.loaders import PythonLoader, YAMLLoader
 
 
 __version__ = (0, 10, 'dev')
-__webassets_version__ = ('dev',)  # webassets core compatibility. used in setup.py
+__webassets_version__ = (0, 10, 'dev')  # webassets core compatibility. used in setup.py
 
 
 __all__ = ('Environment', 'Bundle',)
