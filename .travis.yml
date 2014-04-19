@@ -9,8 +9,8 @@ env:
   - FLASK=0.9
   - FLASK=0.10
 install:
-  - pip install Flask==$FLASK --use-mirrors
-  - pip install -r requirements-dev.pip --use-mirrors
+  - pip install Flask==$FLASK
+  - pip install -r requirements-dev.pip
 script:
   - nosetests tests
 notifications:
