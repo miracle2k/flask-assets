@@ -75,11 +75,11 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         """
         assert not 'url' in self.env.config
 
-        assert Bundle('foo').urls(self.env) == ['/app_static/foo']
+        assert Bundle('foo', env=self.env).urls() == ['/app_static/foo']
         # Urls for files that point to a module use that module's url prefix.
-        assert Bundle('module/bar').urls(self.env) == ['/mod_static/bar']
+        assert Bundle('module/bar', env=self.env).urls() == ['/mod_static/bar']
         # Try with a prefix that's not actually a valid module
-        assert Bundle('nomodule/bar').urls(self.env) == ['/app_static/nomodule/bar']
+        assert Bundle('nomodule/bar', env=self.env).urls() == ['/app_static/nomodule/bar']
 
         # [Regression] Ensure that any request context we may have added
         # to the stack has been removed.
@@ -96,14 +96,15 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         # We do not recognize references to modules.
         assert get_all_bundle_files(Bundle('module/bar'), self.env) == [self.path('module/bar')]
 
-        assert Bundle('foo').urls(self.env) == ['/custom/foo']
-        assert Bundle('module/bar').urls(self.env) == ['/custom/module/bar']
+
+        assert Bundle('foo', env=self.env).urls() == ['/custom/foo']
+        assert Bundle('module/bar', env=self.env).urls() == ['/custom/module/bar']
 
         # [Regression] With a load path configured, generating output
         # urls still works, and it still uses the flask system.
         self.env.debug = False
         self.env.url_expire = False
-        assert Bundle('foo', output='out').urls(self.env) == ['/app_static/out']
+        assert Bundle('foo', output='out', env=self.env).urls() == ['/app_static/out']
 
     def test_custom_directory_and_url(self):
         """Custom directory/url are configured - this will affect how
@@ -118,9 +119,9 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         self.env.debug = False   # Return build urls
         self.env.url_expire = False  # No query strings
 
-        assert Bundle('a', output='foo').urls(self.env) == ['/custom/foo']
+        assert Bundle('a', output='foo', env=self.env).urls() == ['/custom/foo']
         # We do not recognize references to modules.
-        assert Bundle('a', output='module/bar').urls(self.env) == ['/custom/module/bar']
+        assert Bundle('a', output='module/bar', env=self.env).urls() == ['/custom/module/bar']
 
     def test_existing_request_object_used(self):
         """[Regression] Check for a bug where the url generation code of
@@ -133,13 +134,13 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         """
         with self.app.test_request_context(
                   '/', environ_overrides={'SCRIPT_NAME': '/yourapp'}):
-            assert Bundle('foo').urls(self.env) == ['/yourapp/app_static/foo']
+            assert Bundle('foo', env=self.env).urls() == ['/yourapp/app_static/foo']
 
     def test_glob(self):
         """Make sure url generation works with globs."""
         self.app.static_folder = self.tempdir
         self.create_files({'a.js': 'foo', 'b.js': 'bar'})
-        assert list(sorted(self.mkbundle('*.js').urls(self.env))) == [
+        assert list(sorted(self.mkbundle('*.js', env=self.env).urls())) == [
             '/app_static/a.js', '/app_static/b.js']
 
 
@@ -159,7 +160,7 @@ class TestUrlAndDirectoryWithInitApp(object):
         """
         with self.app.test_request_context():
             assert not 'url' in self.env.config
-            assert Bundle('foo').urls(self.env) == ['/initapp_static/foo']
+            assert Bundle('foo', env=self.env).urls() == ['/initapp_static/foo']
 
             assert not 'directory' in self.env.config
             root = self.app.root_path
