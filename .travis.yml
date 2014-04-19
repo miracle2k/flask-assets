@@ -10,7 +10,7 @@ env:
   - FLASK=0.10
 install:
   - pip install Flask==$FLASK
-  - pip install -r requirements-dev.pip --allow-external
+  - pip install -r requirements-dev.pip --allow-external webassets
 script:
   - nosetests tests
 notifications:
