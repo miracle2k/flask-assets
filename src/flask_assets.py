@@ -411,6 +411,6 @@ else:
             prog = '%s %s' % (os.path.basename(sys.argv[0]), sys.argv[1])
 
             impl = self.implementation(self.env, prog=prog, log=self.log)
-            impl.main(args)
+            return impl.main(args)
 
     __all__ = __all__ + ('ManageAssets',)
