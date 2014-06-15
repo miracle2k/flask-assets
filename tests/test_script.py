@@ -77,7 +77,7 @@ class TestScript(TempEnvironmentHelper):
         # up the bundle we defined in above template.
         mgmt = Manager(self.app)
         mgmt.add_command('assets', ManageAssets(log=stdout_log))
-        mgmt.handle('test', 'assets', ['--parse-templates', 'build'])
+        mgmt.handle('test', ['assets', '--parse-templates', 'build'])
 
         assert self.exists('output')
 
