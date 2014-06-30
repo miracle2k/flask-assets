@@ -307,6 +307,14 @@ class Environment(BaseEnvironment):
     directory = property(get_directory, set_directory, doc=
     """The base directory to which all paths will be relative to.
     """)
+    def set_url(self, url):
+        self.config['url'] = url
+    def get_url(self):
+        if self.config.get('url') is not None:
+            return self.config['url']
+        return self._app.static_url_path
+    url = property(get_url, set_url, doc=
+    """The base url to which all static urls will be relative to.""")
 
     def init_app(self, app):
         app.jinja_env.add_extension('webassets.ext.jinja2.AssetsExtension')
