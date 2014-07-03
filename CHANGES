@@ -1,3 +1,6 @@
+0.10 (2014-07-03)
+    This release is compatible with webassets 0.10.
+
 0.9 (2014-02-20)
     This release is compatible with webassets 0.9.
     flask-assets now support Python 3, and drops support for Python 2.5.
