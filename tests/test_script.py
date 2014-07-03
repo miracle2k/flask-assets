@@ -7,6 +7,10 @@ from flask.ext.assets import Environment, ManageAssets
 from webassets.script import GenericArgparseImplementation
 from tests.helpers import TempEnvironmentHelper
 
+# Flask-script seemingly no longer supports 2.6
+if sys.version_info[:2] == (2, 6):
+    raise SkipTest()
+
 try:
     from flask.ext.script import Manager
 except:
