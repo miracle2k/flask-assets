@@ -29,8 +29,7 @@ def parse_version(asignee):
         else:
             raise Exception("cannot find version")
 version = parse_version('__version__')
-webassets_version = parse_version('__webassets_version__')
-
+webassets_requirement = parse_version('__webassets_version__')
 
 setup(
     name='Flask-Assets',
@@ -48,7 +47,7 @@ setup(
     platforms='any',
     install_requires=[
         'Flask>=0.8',
-        'webassets==%s' % webassets_version,
+        'webassets%s' % webassets_requirement,
     ],
     classifiers=[
         'Environment :: Web Environment',
