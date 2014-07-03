@@ -24,4 +24,5 @@ matrix:
     # These do not support Python 3 yet.
     - python: 3.3
       env: FLASK=0.8
+    - python: 3.3
       env: FLASK=0.9
