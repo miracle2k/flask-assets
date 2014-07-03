@@ -7,8 +7,12 @@ from flask.ext.assets import Environment, ManageAssets
 from webassets.script import GenericArgparseImplementation
 from tests.helpers import TempEnvironmentHelper
 
+# Flask-script seemingly no longer supports 2.6
+if sys.version_info[:2] == (2, 6):
+    raise SkipTest()
+
 try:
-    from flaskext.script import Manager
+    from flask.ext.script import Manager
 except:
     raise SkipTest()
 
@@ -77,7 +81,7 @@ class TestScript(TempEnvironmentHelper):
         # up the bundle we defined in above template.
         mgmt = Manager(self.app)
         mgmt.add_command('assets', ManageAssets(log=stdout_log))
-        mgmt.handle('test', 'assets', ['--parse-templates', 'build'])
+        mgmt.handle('test', ['assets', '--parse-templates', 'build'])
 
         assert self.exists('output')
 

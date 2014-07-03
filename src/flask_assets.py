@@ -8,8 +8,8 @@ from webassets.filter import Filter, register_filter
 from webassets.loaders import PythonLoader, YAMLLoader
 
 
-__version__ = (0, 9)
-__webassets_version__ = (0, 9)  # webassets core compatibility. used in setup.py
+__version__ = (0, 10)
+__webassets_version__ = ('>=0.10',)  # webassets core compatibility. used in setup.py
 
 
 __all__ = ('Environment', 'Bundle',)
@@ -24,6 +24,7 @@ class Jinja2Filter(Filter):
     Flask contexts.
     """
     name = 'jinja2'
+    max_debug_level = None
 
     def __init__(self, context=None):
         super(Jinja2Filter, self).__init__()
@@ -145,46 +146,45 @@ class FlaskResolver(Resolver):
     are no longer resolved.
     """
 
-    def split_prefix(self, item):
+    def split_prefix(self, ctx, item):
         """See if ``item`` has blueprint prefix, return (directory, rel_path).
         """
+        app = ctx.environment._app
         try:
-            if hasattr(self.env._app, 'blueprints'):
+            if hasattr(app, 'blueprints'):
                 blueprint, name = item.split('/', 1)
-                directory = get_static_folder(self.env._app.blueprints[blueprint])
+                directory = get_static_folder(app.blueprints[blueprint])
                 endpoint = '%s.static' % blueprint
                 item = name
             else:
                 # Module support for Flask < 0.7
                 module, name = item.split('/', 1)
-                directory = get_static_folder(self.env._app.modules[module])
+                directory = get_static_folder(app.modules[module])
                 endpoint = '%s.static' % module
                 item = name
         except (ValueError, KeyError):
-            directory = get_static_folder(self.env._app)
+            directory = get_static_folder(app)
             endpoint = 'static'
 
         return directory, item, endpoint
 
-    @property
-    def use_webassets_system_for_output(self):
-        return self.env.config.get('directory') is not None or \
-               self.env.config.get('url') is not None
+    def use_webassets_system_for_output(self, ctx):
+        return ctx.config.get('directory') is not None or \
+               ctx.config.get('url') is not None
 
-    @property
-    def use_webassets_system_for_sources(self):
-        return bool(self.env.load_path)
+    def use_webassets_system_for_sources(self, ctx):
+        return bool(ctx.load_path)
 
-    def search_for_source(self, item):
+    def search_for_source(self, ctx, item):
         # If a load_path is set, use it instead of the Flask static system.
         #
         # Note: With only env.directory set, we don't go to default;
         # Setting env.directory only makes the output directory fixed.
-        if self.use_webassets_system_for_sources:
-            return Resolver.search_for_source(self, item)
+        if self.use_webassets_system_for_sources(ctx):
+            return Resolver.search_for_source(self, ctx, item)
 
         # Look in correct blueprint's directory
-        directory, item, endpoint = self.split_prefix(item)
+        directory, item, endpoint = self.split_prefix(ctx, item)
         try:
             return self.consider_single_directory(directory, item)
         except IOError:
@@ -192,31 +192,31 @@ class FlaskResolver(Resolver):
             # expect an IOError upon missing files. They need to be rewritten.
             return path.normpath(path.join(directory, item))
 
-    def resolve_output_to_path(self, target, bundle):
+    def resolve_output_to_path(self, ctx, target, bundle):
         # If a directory/url pair is set, always use it for output files
-        if self.use_webassets_system_for_output:
-            return Resolver.resolve_output_to_path(self, target, bundle)
+        if self.use_webassets_system_for_output(ctx):
+            return Resolver.resolve_output_to_path(self, ctx, target, bundle)
 
         # Allow targeting blueprint static folders
-        directory, rel_path, endpoint = self.split_prefix(target)
+        directory, rel_path, endpoint = self.split_prefix(ctx, target)
         return path.normpath(path.join(directory, rel_path))
 
-    def resolve_source_to_url(self, filepath, item):
+    def resolve_source_to_url(self, ctx, filepath, item):
         # If a load path is set, use it instead of the Flask static system.
-        if self.use_webassets_system_for_sources:
-            return super(FlaskResolver, self).resolve_source_to_url(filepath, item)
+        if self.use_webassets_system_for_sources(ctx):
+            return super(FlaskResolver, self).resolve_source_to_url(ctx, filepath, item)
 
-        return self.convert_item_to_flask_url(item, filepath)
+        return self.convert_item_to_flask_url(ctx, item, filepath)
 
-    def resolve_output_to_url(self, target):
+    def resolve_output_to_url(self, ctx, target):
         # With a directory/url pair set, use it for output files.
-        if self.use_webassets_system_for_output:
-            return Resolver.resolve_output_to_url(self, target)
+        if self.use_webassets_system_for_output(ctx):
+            return Resolver.resolve_output_to_url(self, ctx, target)
 
         # Otherwise, behaves like all other flask URLs.
-        return self.convert_item_to_flask_url(target)
+        return self.convert_item_to_flask_url(ctx, target)
 
-    def convert_item_to_flask_url(self, item, filepath=None):
+    def convert_item_to_flask_url(self, ctx, item, filepath=None):
         """Given a relative reference like `foo/bar.css`, returns
         the Flask static url. By doing so it takes into account
         blueprints, i.e. in the aformentioned example,
@@ -230,7 +230,7 @@ class FlaskResolver(Resolver):
         then we import the url_for function from flask.ext.s3,
         otherwise we import url_for from flask directly.
         """
-        if self.env._app.config.get("FLASK_ASSETS_USE_S3"):
+        if ctx.environment._app.config.get("FLASK_ASSETS_USE_S3"):
             try:
                 from flask.ext.s3 import url_for
             except ImportError as e:
@@ -239,22 +239,22 @@ class FlaskResolver(Resolver):
         else:
             from flask import url_for
 
-        directory, rel_path, endpoint = self.split_prefix(item)
+        directory, rel_path, endpoint = self.split_prefix(ctx, item)
 
         if filepath is not None:
             filename = filepath[len(directory)+1:]
         else:
             filename = rel_path
 
-        ctx = None
+        flask_ctx = None
         if not _request_ctx_stack.top:
-            ctx = self.env._app.test_request_context()
-            ctx.push()
+            flask_ctx = ctx.environment._app.test_request_context()
+            flask_ctx.push()
         try:
             return url_for(endpoint, filename=filename)
         finally:
-            if ctx:
-                ctx.pop()
+            if flask_ctx:
+                flask_ctx.pop()
 
 
 class Environment(BaseEnvironment):
@@ -307,6 +307,14 @@ class Environment(BaseEnvironment):
     directory = property(get_directory, set_directory, doc=
     """The base directory to which all paths will be relative to.
     """)
+    def set_url(self, url):
+        self.config['url'] = url
+    def get_url(self):
+        if self.config.get('url') is not None:
+            return self.config['url']
+        return self._app.static_url_path
+    url = property(get_url, set_url, doc=
+    """The base url to which all static urls will be relative to.""")
 
     def init_app(self, app):
         app.jinja_env.add_extension('webassets.ext.jinja2.AssetsExtension')
@@ -339,6 +347,9 @@ else:
             super(FlaskArgparseInterface, self).\
                 _construct_parser(*a, **kw)
             self.parser.add_argument(
+                '--jinja-extension', default='*.html',
+                help='specify the glob pattern for Jinja extensions (default: *.html)')
+            self.parser.add_argument(
                 '--parse-templates', action='store_true',
                 help='search project templates to find bundles')
 
@@ -350,7 +361,7 @@ else:
                     # Note that we exclude container bundles. By their very nature,
                     # they are guaranteed to have been created by solely referencing
                     # other bundles which are already registered.
-                    env.add(*[b for b in self.load_from_templates(env)
+                    env.add(*[b for b in self.load_from_templates(env, ns.jinja_extension)
                                     if not b.is_container])
 
                 if not len(env):
@@ -361,7 +372,7 @@ else:
                         '--parse-templates option.')
             return env
 
-        def load_from_templates(self, env):
+        def load_from_templates(self, env, jinja_extension):
             from webassets.ext.jinja2 import Jinja2Loader, AssetsExtension
             from flask import current_app as app
 
@@ -376,7 +387,8 @@ else:
                 template_dirs.append(
                     path.join(blueprint.root_path, blueprint.template_folder))
 
-            return Jinja2Loader(env, template_dirs, [jinja2_env]).load_bundles()
+            return Jinja2Loader(env, template_dirs, [jinja2_env], jinja_ext=jinja_extension).\
+                load_bundles()
 
     class ManageAssets(script.Command):
         """Manage assets."""
@@ -407,6 +419,6 @@ else:
             prog = '%s %s' % (os.path.basename(sys.argv[0]), sys.argv[1])
 
             impl = self.implementation(self.env, prog=prog, log=self.log)
-            impl.main(args)
+            return impl.main(args)
 
     __all__ = __all__ + ('ManageAssets',)
