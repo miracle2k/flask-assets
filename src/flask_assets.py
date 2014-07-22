@@ -149,7 +149,7 @@ class FlaskResolver(Resolver):
     def split_prefix(self, ctx, item):
         """See if ``item`` has blueprint prefix, return (directory, rel_path).
         """
-        app = ctx.environment._app
+        app = ctx._app
         try:
             if hasattr(app, 'blueprints'):
                 blueprint, name = item.split('/', 1)
