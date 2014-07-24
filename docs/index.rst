@@ -185,7 +185,7 @@ Flask-CDN Configuration
 
 `Flask-CDN`_ allows you to upload and serve your static files from
 a CDN (like `Amazon Cloudfront`_), without having to modify
-your templates.. It accomplishes this by overwriting the Flask
+your templates. It accomplishes this by overwriting the Flask
 ``url_for`` function. In order for Flask-Assets to use this
 overwritten ``url_for`` function, you need to let it know that
 you are using Flask-CDN. Just set
