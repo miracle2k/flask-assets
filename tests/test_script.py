@@ -1,7 +1,14 @@
 from __future__ import absolute_import
 
-import sys
 from nose import SkipTest
+
+# check for flask-script before importing things that fail if it's not present
+try:
+    from flask.ext.script import Manager
+except:
+    raise SkipTest()
+
+import sys
 from flask import Flask
 from flask.ext.assets import Environment, ManageAssets
 from webassets.script import GenericArgparseImplementation
@@ -9,11 +16,6 @@ from tests.helpers import TempEnvironmentHelper
 
 # Flask-script seemingly no longer supports 2.6
 if sys.version_info[:2] == (2, 6):
-    raise SkipTest()
-
-try:
-    from flask.ext.script import Manager
-except:
     raise SkipTest()
 
 
