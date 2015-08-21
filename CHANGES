@@ -1,3 +1,7 @@
+0.11 (2015-08-21)
+    - Match webassets 0.11.
+    - Option to use Flask-CDN (James Elkins).
+
 0.10 (2014-07-03)
     This release is compatible with webassets 0.10.
 
