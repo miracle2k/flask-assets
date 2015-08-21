@@ -8,8 +8,8 @@ from webassets.filter import Filter, register_filter
 from webassets.loaders import PythonLoader, YAMLLoader
 
 
-__version__ = (0, 10)
-__webassets_version__ = ('>=0.10',)  # webassets core compatibility. used in setup.py
+__version__ = (0, 11)
+__webassets_version__ = ('>=0.11',)  # webassets core compatibility. used in setup.py
 
 
 __all__ = ('Environment', 'Bundle',)
