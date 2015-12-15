@@ -260,7 +260,17 @@ class FlaskResolver(Resolver):
             flask_ctx = ctx.environment._app.test_request_context()
             flask_ctx.push()
         try:
-            return url_for(endpoint, filename=filename)
+            url = url_for(endpoint, filename=filename)
+            # In some cases, url will be an absolute url with a scheme and hostname.
+            # (for example, when using werkzeug's host matching).
+            # In general, url_for() will return a http url. During assets build, we
+            # we don't know yet if the assets will be served over http, https or both.
+            # Let's use // instead. url_for takes a _scheme argument, but only together
+            # with external=True, which we do not want to force every time. Further,
+            # this _scheme argument is not able to render // - it always forces a colon.
+            if url and url.startswith('http:'):
+                url = url[5:]
+            return url
         finally:
             if flask_ctx:
                 flask_ctx.pop()
