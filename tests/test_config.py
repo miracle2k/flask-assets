@@ -6,7 +6,7 @@ from tests.helpers import check_warnings
 
 from nose.tools import assert_raises
 from flask import Flask
-from flask.ext.assets import Environment
+from flask_assets import Environment
 from webassets.exceptions import ImminentDeprecationWarning
 
 try:

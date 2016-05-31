@@ -1,7 +1,7 @@
 import os
 from nose.tools import assert_raises
 from flask import Flask
-from flask.ext.assets import Environment, Bundle
+from flask_assets import Environment, Bundle
 
 
 class TestEnv:
