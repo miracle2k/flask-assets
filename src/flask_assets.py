@@ -227,7 +227,7 @@ class FlaskResolver(Resolver):
         glob instruction that was resolved to multiple files.
 
         If app.config("FLASK_ASSETS_USE_S3") exists and is True
-        then we import the url_for function from flask.ext.s3,
+        then we import the url_for function from flask_s3,
         otherwise we import url_for from flask directly.
 
         If app.config("FLASK_ASSETS_USE_CDN") exists and is True
@@ -235,13 +235,13 @@ class FlaskResolver(Resolver):
         """
         if ctx.environment._app.config.get("FLASK_ASSETS_USE_S3"):
             try:
-                from flask.ext.s3 import url_for
+                from flask_s3 import url_for
             except ImportError as e:
                 print("You must have Flask S3 to use FLASK_ASSETS_USE_S3 option")
                 raise e
         elif ctx.environment._app.config.get("FLASK_ASSETS_USE_CDN"):
             try:
-                from flask.ext.cdn import url_for
+                from flask_cdn import url_for
             except ImportError as e:
                 print("You must have Flask CDN to use FLASK_ASSETS_USE_CDN option")
                 raise e
@@ -352,7 +352,7 @@ class Environment(BaseEnvironment):
             self.register(name, bundles[name])
 
 try:
-    from flask.ext import script
+    import flask_script as script
 except ImportError:
     pass
 else:

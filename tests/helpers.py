@@ -1,6 +1,6 @@
 from flask.app import Flask
 from webassets.test import TempEnvironmentHelper as BaseTempEnvironmentHelper
-from flask.ext.assets import Environment
+from flask_assets import Environment
 
 try:
     from flask import Blueprint

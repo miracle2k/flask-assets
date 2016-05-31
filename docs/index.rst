@@ -31,7 +31,7 @@ registering your assets with it in the form of so called *bundles*.
 .. code-block:: python
 
     from flask import Flask
-    from flask.ext.assets import Environment, Bundle
+    from flask_assets import Environment, Bundle
 
     app = Flask(__name__)
     assets = Environment(app)
@@ -59,7 +59,7 @@ rather than passing a fixed application object:
 .. code-block:: python
 
     app = Flask(__name__)
-    assets = flask.ext.assets.Environment()
+    assets = flask_assets.Environment()
     assets.init_app(app)
 
 
@@ -206,7 +206,7 @@ as ``flaskext.assets.ManageAssets``:
 
 .. code-block:: python
 
-    from flask.ext.assets import ManageAssets
+    from flask_assets import ManageAssets
     manager = Manager(app)
     manager.add_command("assets", ManageAssets(assets_env))
 

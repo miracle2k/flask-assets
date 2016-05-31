@@ -2,15 +2,15 @@ from __future__ import absolute_import
 from nose.tools import assert_raises
 
 from flask import Flask
-from flask.ext.assets import Environment, Bundle
+from flask_assets import Environment, Bundle
 from webassets.bundle import get_all_bundle_files
 from tests.helpers import TempEnvironmentHelper, Module, Blueprint
 
 
 def test_import():
     # We want to expose these via the assets extension module.
-    from flask.ext.assets import Bundle
-    from flask.ext.assets import Environment
+    from flask_assets import Bundle
+    from flask_assets import Environment
 
 
 class TestUrlAndDirectory(TempEnvironmentHelper):
