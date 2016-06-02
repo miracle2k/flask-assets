@@ -4,13 +4,13 @@ from nose import SkipTest
 
 # check for flask-script before importing things that fail if it's not present
 try:
-    from flask.ext.script import Manager
+    from flask_script import Manager
 except:
     raise SkipTest()
 
 import sys
 from flask import Flask
-from flask.ext.assets import Environment, ManageAssets
+from flask_assets import Environment, ManageAssets
 from webassets.script import GenericArgparseImplementation
 from tests.helpers import TempEnvironmentHelper
 
