@@ -245,6 +245,12 @@ class FlaskResolver(Resolver):
             except ImportError as e:
                 print("You must have Flask CDN to use FLASK_ASSETS_USE_CDN option")
                 raise e
+        elif ctx.environment._app.config.get("FLASK_ASSETS_USE_AZURE"):
+            try:
+                from flask_azure_storage import url_for
+            except ImportError as e:
+                print("You must have Flask Azure Storage to use FLASK_ASSETS_USE_AZURE option")
+                raise e
         else:
             from flask import url_for
 
