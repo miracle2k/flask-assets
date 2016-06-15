@@ -178,7 +178,7 @@ you are using Flask-S3. Just set
 
     app.config['FLASK_ASSETS_USE_S3']=True
 
-.. _Flask-S3: https://flask-s3.readthedocs.org/en/v0.1.4/
+.. _Flask-S3: https://flask-s3.readthedocs.io/en/latest/
 
 Flask-CDN Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -194,7 +194,7 @@ you are using Flask-CDN. Just set
 
     app.config['FLASK_ASSETS_USE_CDN']=True
 
-.. _Flask-CDN: https://flask-cdn.readthedocs.org/en/v1.0.0/
+.. _Flask-CDN: https://flask-cdn.readthedocs.io/en/latest/
 .. _Amazon Cloudfront: https://aws.amazon.com/cloudfront/
 
 
