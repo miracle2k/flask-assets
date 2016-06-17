@@ -45,6 +45,11 @@ setup(
     package_dir={'': 'src'},
     zip_safe=False,
     platforms='any',
+    entry_points={
+        'flask.commands': [
+            'assets = flask_assets:assets',
+        ],
+    },
     install_requires=[
         'Flask>=0.8',
         'webassets%s' % webassets_requirement,
