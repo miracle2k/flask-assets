@@ -3,11 +3,13 @@ python:
   - 2.6
   - 2.7
   - 3.3
+  - 3.5
   - pypy
 env:
   - FLASK=0.8
   - FLASK=0.9
   - FLASK=0.10
+  - FLASK=0.11
 install:
   - pip install Flask==$FLASK
   - pip install -r requirements-dev.pip --allow-external webassets
@@ -25,4 +27,8 @@ matrix:
     - python: 3.3
       env: FLASK=0.8
     - python: 3.3
+      env: FLASK=0.9
+    - python: 3.5
+      env: FLASK=0.8
+    - python: 3.5
       env: FLASK=0.9
