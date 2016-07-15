@@ -1,23 +1,30 @@
+"""Integration of the ``webassets`` library with Flask."""
+
 from __future__ import print_function
+
 import logging
 from os import path
-from flask import current_app, _request_ctx_stack
+
+from flask import _request_ctx_stack, current_app
 from flask.templating import render_template_string
-from webassets.env import (\
-    BaseEnvironment, ConfigStorage, env_options, Resolver, url_prefix_join)
+# We want to expose Bundle via this module.
+from webassets import Bundle
+from webassets.env import (BaseEnvironment, ConfigStorage, Resolver,
+                           env_options, url_prefix_join)
 from webassets.filter import Filter, register_filter
 from webassets.loaders import PythonLoader, YAMLLoader
 
-
 __version__ = (0, 11)
-__webassets_version__ = ('>=0.11',)  # webassets core compatibility. used in setup.py
+# webassets core compatibility used in setup.py
+__webassets_version__ = ('>=0.11.1', )
 
-
-__all__ = ('Environment', 'Bundle',)
-
-
-# We want to expose this here.
-from webassets import Bundle
+__all__ = (
+    'Environment',
+    'Bundle',
+    'FlaskConfigStorage',
+    'FlaskResolver',
+    'Jinja2Filter',
+)
 
 
 class Jinja2Filter(Filter):
@@ -284,6 +291,11 @@ class FlaskResolver(Resolver):
 
 
 class Environment(BaseEnvironment):
+    """This object is used to hold a collection of bundles and configuration.
+
+    If it initialized with an instance of Flask application then webassets
+    Jinja2 extension is automatically registered.
+    """
 
     config_storage_class = FlaskConfigStorage
     resolver_class = FlaskResolver
