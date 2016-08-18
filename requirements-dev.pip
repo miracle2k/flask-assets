@@ -1,6 +1,5 @@
 nose
-Flask>=0.8
 Flask-Script>=0.3.3
-webassets==0.10
+webassets==0.11.1
 PyYAML
 pyScss>=1.1.5

@@ -1,7 +1,7 @@
 Flask-Assets
 ============
 
-.. module:: flask_assets
+.. currentmodule:: flask_assets
 
 Flask-Assets helps you to integrate `webassets`_ into your `Flask`_
 application.
@@ -198,11 +198,44 @@ you are using Flask-CDN. Just set
 .. _Amazon Cloudfront: https://aws.amazon.com/cloudfront/
 
 
-Management Command
-------------------
+Command Line Interface
+----------------------
+
+*New in version 0.12.*
+
+Flask 0.11+ comes with build-in integration of `CLI`_ using `click`_
+library. The ``assets`` command is automatically installed through
+*setuptools* using ``flask.commands`` entry point group in **setup.py**.
+
+.. code-block:: python
+
+   entry_points={
+       'flask.commands': [
+           'assets = flask_assets:assets',
+       ],
+   },
+
+After installing Flask 0.11+ you should see following line in the output
+when executing ``flask`` command in your shell:
+
+.. code-block:: console
+
+   $ flask --help
+   ...
+   Commands:
+     assets   Web assets commands.
+   ...
+
+
+.. _CLI: https://flask.pocoo.org/docs/0.11/cli/
+.. _click: https://click.pocoo.org/docs/latest/
+
+
+Legacy support
+~~~~~~~~~~~~~~
 
 If you have `Flask-Script`_ installed, then a command will be available
-as ``flaskext.assets.ManageAssets``:
+as ``flask_assets.ManageAssets``:
 
 .. code-block:: python
 
@@ -221,6 +254,12 @@ command line. See the list of
 
 .. _Flask-Script: http://pypi.python.org/pypi/Flask-Script
 
+
+API
+---
+
+.. automodule:: flask_assets
+   :members:
 
 Webassets documentation
 -----------------------
