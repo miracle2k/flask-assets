@@ -117,7 +117,7 @@ def get_static_folder(app_or_blueprint):
     """
     if not hasattr(app_or_blueprint, 'static_folder'):
         # I believe this is for app objects in very old Flask
-        # versions that did not support ccustom static folders.
+        # versions that did not support custom static folders.
         return path.join(app_or_blueprint.root_path, 'static')
 
     if not app_or_blueprint.has_static_folder:
