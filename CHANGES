@@ -1,4 +1,4 @@
-0.12 (2016-07-13)
+0.12 (2016-08-18)
     - Added registration of Flask CLI commands using `flask.commands`
       entrypoint group. (Jiri Kuncar)
     - Added an optional support for FlaskAzureStorage when
