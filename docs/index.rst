@@ -255,6 +255,23 @@ command line. See the list of
 .. _Flask-Script: http://pypi.python.org/pypi/Flask-Script
 
 
+Using in Google App Engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use flask-assets in Google App Engine by manually building assets.
+The GAE runtime cannot create files, which is necessary for normal flask-assets
+functionality, but you can deploy pre-built assets. You can use a file change
+listener to rebuild assets on the fly in development.
+
+For a fairly minimal example which includes auto-reloading in development, see
+`flask-assets-gae-example`_.
+
+Also see the `relevant webassets documentation`_.
+
+.. _flask-assets-gae-example: https://github.com/SocosLLC/flask-assets-gae-example
+.. _relevant webassets documentation: http://webassets.readthedocs.io/en/latest/faq.html#is-google-app-engine-supported
+
+
 API
 ---
 
