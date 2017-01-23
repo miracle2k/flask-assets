@@ -355,6 +355,7 @@ class Environment(BaseEnvironment):
     """The base url to which all static urls will be relative to.""")
 
     def init_app(self, app):
+        self.app = app
         app.jinja_env.add_extension('webassets.ext.jinja2.AssetsExtension')
         app.jinja_env.assets_environment = self
 
