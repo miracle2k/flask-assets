@@ -12,7 +12,7 @@ env:
   - FLASK=0.11
 install:
   - pip install Flask==$FLASK
-  - pip install -r requirements-dev.pip --allow-external webassets
+  - pip install -r requirements-dev.pip --allow-external webassets --allow-unverified webassets
 script:
   - nosetests tests
 notifications:
