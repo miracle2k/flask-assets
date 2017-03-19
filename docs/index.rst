@@ -52,7 +52,7 @@ external config file, and read them from there. ``webassets`` includes a
 number of :ref:`helper classes <webassets:loaders>` for some popular formats
 like YAML.
 
-Like is common for a Flask extension, a Flask-Asssets instance may be used
+Like is common for a Flask extension, a Flask-Assets instance may be used
 with multiple applications by initializing through ``init_app`` calls,
 rather than passing a fixed application object:
 
