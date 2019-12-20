@@ -1,0 +1,8 @@
+- Update CHANGES file
+- Update version number in __init__.py
+- Update version number in latest "Upgrading" section in docs
+- git tag -a ...
+- ./setup.py sdist bdist_wheel upload
+- scp sdist file to my own server
+- Don't forget to push --all and push --tags.
+
