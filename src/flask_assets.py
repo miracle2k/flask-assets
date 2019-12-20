@@ -14,9 +14,9 @@ from webassets.env import (BaseEnvironment, ConfigStorage, Resolver,
 from webassets.filter import Filter, register_filter
 from webassets.loaders import PythonLoader, YAMLLoader
 
-__version__ = (0, 12)
+__version__ = (2, 0)
 # webassets core compatibility used in setup.py
-__webassets_version__ = ('>=0.11.1', )
+__webassets_version__ = ('>=2.0', )
 
 __all__ = (
     'Environment',

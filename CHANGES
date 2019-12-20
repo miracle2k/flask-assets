@@ -1,3 +1,6 @@
+2.0 (2019-12-20)
+    - Compatibility with webassets 2.0.
+
 0.12 (2016-08-18)
     - Added registration of Flask CLI commands using `flask.commands`
       entrypoint group. (Jiri Kuncar)
