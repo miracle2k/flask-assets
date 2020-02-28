@@ -333,7 +333,7 @@ class Environment(BaseEnvironment):
 
     # XXX: This is required because in a couple of places, webassets 0.6
     # still access env.directory, at one point even directly. We need to
-    # fix this for 0.6 compatibility, but it might be preferrable to
+    # fix this for 0.6 compatibility, but it might be preferable to
     # introduce another API similar to _normalize_source_path() for things
     # like the cache directory and output files.
     def set_directory(self, directory):
