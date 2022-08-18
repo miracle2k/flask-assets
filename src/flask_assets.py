@@ -5,7 +5,8 @@ from __future__ import print_function
 import logging
 from os import path
 
-from flask import _request_ctx_stack, current_app
+from flask.globals import request_ctx
+from flask import current_app
 from flask.templating import render_template_string
 # We want to expose Bundle via this module.
 from webassets import Bundle
@@ -270,7 +271,7 @@ class FlaskResolver(Resolver):
             filename = rel_path
 
         flask_ctx = None
-        if not _request_ctx_stack.top:
+        if not request_ctx:
             flask_ctx = ctx.environment._app.test_request_context()
             flask_ctx.push()
         try:
@@ -314,7 +315,7 @@ class Environment(BaseEnvironment):
         if self.app is not None:
             return self.app
 
-        ctx = _request_ctx_stack.top
+        ctx = request_ctx
         if ctx is not None:
             return ctx.app
 
