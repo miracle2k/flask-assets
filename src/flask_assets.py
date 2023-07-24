@@ -5,7 +5,8 @@ from __future__ import print_function
 import logging
 from os import path
 
-from flask import _request_ctx_stack, current_app
+from flask import current_app, has_app_context, has_request_context
+from flask.globals import app_ctx, request_ctx
 from flask.templating import render_template_string
 # We want to expose Bundle via this module.
 from webassets import Bundle
@@ -14,7 +15,7 @@ from webassets.env import (BaseEnvironment, ConfigStorage, Resolver,
 from webassets.filter import Filter, register_filter
 from webassets.loaders import PythonLoader, YAMLLoader
 
-__version__ = (2, 0)
+__version__ = (2, 1)
 # webassets core compatibility used in setup.py
 __webassets_version__ = ('>=2.0', )
 
@@ -270,7 +271,7 @@ class FlaskResolver(Resolver):
             filename = rel_path
 
         flask_ctx = None
-        if not _request_ctx_stack.top:
+        if not has_request_context():
             flask_ctx = ctx.environment._app.test_request_context()
             flask_ctx.push()
         try:
@@ -314,17 +315,12 @@ class Environment(BaseEnvironment):
         if self.app is not None:
             return self.app
 
-        ctx = _request_ctx_stack.top
+        ctx = request_ctx
         if ctx is not None:
             return ctx.app
 
-        try:
-            from flask import _app_ctx_stack
-            app_ctx = _app_ctx_stack.top
-            if app_ctx is not None:
-                return app_ctx.app
-        except ImportError:
-            pass
+        if has_app_context():
+            return app_ctx.app
 
         raise RuntimeError('assets instance not bound to an application, '+
                             'and no application in current context')
