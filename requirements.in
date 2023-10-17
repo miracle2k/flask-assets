@@ -1,0 +1,5 @@
+pytest
+Flask-Script
+webassets
+PyYAML
+pyScss

@@ -13,3 +13,7 @@
 /build/
 /dist/
 /src/Flask_Assets.egg-info/
+venv
+tests/static
+.eggs/
+
