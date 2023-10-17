@@ -2,12 +2,10 @@
 """
 
 from __future__ import absolute_import
-from tests.helpers import check_warnings
 
-from nose.tools import assert_raises
+import pytest
 from flask import Flask
 from flask_assets import Environment
-from webassets.exceptions import ImminentDeprecationWarning
 
 try:
     from webassets.updater import BaseUpdater
@@ -73,8 +71,10 @@ class TestConfigNoAppBound:
 
     def test_no_app_available(self):
         """Without an application bound, we can't do much."""
-        assert_raises(RuntimeError, setattr, self.env, 'debug', True)
-        assert_raises(RuntimeError, self.env.config.get, 'debug')
+        with pytest.raises(RuntimeError):
+            setattr(self.env, 'debug', True)
+        with pytest.raises(RuntimeError):
+            self.env.config.get('debug')
 
     def test_global_defaults(self):
         """We may set defaults even without an application, however."""
@@ -89,7 +89,8 @@ class TestConfigNoAppBound:
         self.env.init_app(app1)
 
         # With no app yet available...
-        assert_raises(RuntimeError, getattr, self.env, 'url')
+        with pytest.raises(RuntimeError):
+            getattr(self.env, 'url')
         # ...set a default
         self.env.config.setdefault('FOO', 'BAR')
 
@@ -109,6 +110,7 @@ class TestConfigNoAppBound:
         """KeyError is raised if a config value doesn't exist.
         """
         with Flask(__name__).test_request_context():
-            assert_raises(KeyError, self.env.config.__getitem__, 'YADDAYADDA')
+            with pytest.raises(KeyError):
+                self.env.config['YADDAYADDA']
             # The get() helper, on the other hand, simply returns None
             assert self.env.config.get('YADDAYADDA') == None

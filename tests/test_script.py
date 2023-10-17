@@ -1,22 +1,21 @@
 from __future__ import absolute_import
 
-from nose import SkipTest
+import pytest
 
 # check for flask-script before importing things that fail if it's not present
 try:
     from flask_script import Manager
 except:
-    raise SkipTest()
+    pytest.skip(allow_module_level=True)
 
 import sys
-from flask import Flask
-from flask_assets import Environment, ManageAssets
+from flask_assets import ManageAssets
 from webassets.script import GenericArgparseImplementation
 from tests.helpers import TempEnvironmentHelper
 
 # Flask-script seemingly no longer supports 2.6
 if sys.version_info[:2] == (2, 6):
-    raise SkipTest()
+    pytest.skip(allow_module_level=True)
 
 
 # The CLI likes to log to stderr, which isn't nice to the test output.

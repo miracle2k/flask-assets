@@ -1,9 +1,10 @@
 from __future__ import absolute_import
-from nose.tools import assert_raises
 
+import pytest
 from flask import Flask
 from flask_assets import Environment, Bundle
 from webassets.bundle import get_all_bundle_files
+
 from tests.helpers import TempEnvironmentHelper, Module, Blueprint
 
 
@@ -28,11 +29,11 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
     def setup(self):
         TempEnvironmentHelper.setup(self)
 
-        self.app = Flask(__name__, static_path='/app_static')
+        self.app = Flask(__name__, static_url_path='/app_static')
         from tests import test_module
         if not Blueprint:
             self.module = Module(test_module.__name__, name='module',
-                                 static_path='/mod_static')
+                                 static_url_path='/mod_static')
             self.app.register_module(self.module)
         else:
             self.blueprint = Blueprint('module', test_module.__name__,
@@ -44,8 +45,10 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
     def test_config_values_not_set_by_default(self):
         assert not 'directory' in self.env.config
         assert not 'url' in self.env.config
-        assert_raises(KeyError, self.env.config.__getitem__, 'directory')
-        assert_raises(KeyError, self.env.config.__getitem__, 'url')
+        with pytest.raises(KeyError):
+            self.env.config['directory']
+        with pytest.raises(KeyError):
+            self.env.config['url']
 
     def test_directory_auto(self):
         """Test how we resolve file references through the Flask static
@@ -65,8 +68,8 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         assert get_all_bundle_files(Bundle('./module/bar'), self.env) == [root + '/static/module/bar']
 
         # Custom static folder
-        self.app.static_folder = '/'
-        assert get_all_bundle_files(Bundle('foo'), self.env) == ['/foo']
+        self.app.static_folder = '/test'
+        assert get_all_bundle_files(Bundle('foo'), self.env) == ['/test/foo']
 
     def test_url_auto(self):
         """Test how urls are generated via the Flask static system
@@ -83,8 +86,8 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
 
         # [Regression] Ensure that any request context we may have added
         # to the stack has been removed.
-        from flask import _request_ctx_stack
-        assert _request_ctx_stack.top is None
+        from flask import has_request_context
+        assert not has_request_context()
 
     def test_custom_load_path(self):
         """A custom load_path is configured - this will affect how
@@ -150,7 +153,7 @@ class TestUrlAndDirectoryWithInitApp(object):
     """
 
     def setup(self):
-        self.app = Flask(__name__, static_path='/initapp_static')
+        self.app = Flask(__name__, static_url_path='/initapp_static')
         self.env = Environment()
         self.env.init_app(self.app)
 
@@ -233,7 +236,8 @@ class TestBlueprints(TempEnvironmentHelper):
     def test_blueprint_no_static_folder(self):
         """Test dealing with a blueprint without a static folder."""
         self.make_blueprint('module')
-        assert_raises(TypeError, self.mkbundle('module/foo').urls)
+        with pytest.raises(TypeError):
+            self.mkbundle('module/foo').urls()
 
     def test_cssrewrite(self):
         """Make sure cssrewrite works with Blueprints.

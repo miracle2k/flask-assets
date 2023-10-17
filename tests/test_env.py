@@ -1,5 +1,5 @@
 import os
-from nose.tools import assert_raises
+
 from flask import Flask
 from flask_assets import Environment, Bundle
 
