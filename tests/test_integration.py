@@ -28,11 +28,11 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
     def setup(self):
         TempEnvironmentHelper.setup(self)
 
-        self.app = Flask(__name__, static_path='/app_static')
+        self.app = Flask(__name__, static_url_path='/app_static')
         from tests import test_module
         if not Blueprint:
             self.module = Module(test_module.__name__, name='module',
-                                 static_path='/mod_static')
+                                 static_url_path='/mod_static')
             self.app.register_module(self.module)
         else:
             self.blueprint = Blueprint('module', test_module.__name__,
@@ -65,8 +65,8 @@ class TestUrlAndDirectory(TempEnvironmentHelper):
         assert get_all_bundle_files(Bundle('./module/bar'), self.env) == [root + '/static/module/bar']
 
         # Custom static folder
-        self.app.static_folder = '/'
-        assert get_all_bundle_files(Bundle('foo'), self.env) == ['/foo']
+        self.app.static_folder = '/test'
+        assert get_all_bundle_files(Bundle('foo'), self.env) == ['/test/foo']
 
     def test_url_auto(self):
         """Test how urls are generated via the Flask static system
@@ -150,7 +150,7 @@ class TestUrlAndDirectoryWithInitApp(object):
     """
 
     def setup(self):
-        self.app = Flask(__name__, static_path='/initapp_static')
+        self.app = Flask(__name__, static_url_path='/initapp_static')
         self.env = Environment()
         self.env.init_app(self.app)
 
