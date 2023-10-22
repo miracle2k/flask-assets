@@ -5,7 +5,12 @@ from __future__ import print_function
 import logging
 from os import path
 
-from flask.globals import request_ctx, app_ctx
+try:
+    from flask.globals import request_ctx, app_ctx
+except ImportError:
+    from flask import _request_ctx_stack, _app_ctx_stack
+    request_ctx = _request_ctx_stack.top
+    app_ctx = _app_ctx_stack.top
 from flask import current_app, has_app_context, has_request_context
 from flask.templating import render_template_string
 # We want to expose Bundle via this module.
