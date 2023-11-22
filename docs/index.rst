@@ -231,30 +231,6 @@ when executing ``flask`` command in your shell:
 .. _click: https://click.pocoo.org/docs/latest/
 
 
-Legacy support
-~~~~~~~~~~~~~~
-
-If you have `Flask-Script`_ installed, then a command will be available
-as ``flask_assets.ManageAssets``:
-
-.. code-block:: python
-
-    from flask_assets import ManageAssets
-    manager = Manager(app)
-    manager.add_command("assets", ManageAssets(assets_env))
-
-You can explicitly pass the ``assets_env`` when adding the command as above.
-Alternatively, ``ManageAssets`` will import the ``current_app`` from Flask and
-use the ``jinja_env``.
-
-The command allows you to do things like rebuilding bundles from the
-command line. See the list of
-:ref:`available subcommands <webassets:script-commands>`.
-
-
-.. _Flask-Script: http://pypi.python.org/pypi/Flask-Script
-
-
 Using in Google App Engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
