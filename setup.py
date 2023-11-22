@@ -66,6 +66,5 @@ setup(
     ],
     tests_require=[
         'pytest',
-        'flask-script'
     ],
 )
