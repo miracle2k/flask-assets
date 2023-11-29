@@ -1,38 +1,27 @@
-from flask.app import Flask
-from webassets.test import TempEnvironmentHelper as BaseTempEnvironmentHelper
-from flask_assets import Environment
+import os
 
-try:
-    from flask import Blueprint
-    Module = None
-except ImportError:
-    # Blueprints only available starting with 0.7,
-    # fall back to old Modules otherwise.
-    Blueprint = None
-    from flask import Module
+from flask import Blueprint
+
+__all__ = ("create_files", "new_blueprint")
 
 
-__all__ = ('TempEnvironmentHelper', 'Module', 'Blueprint')
+def create_files(parent, *files):
+    result = []
+    for file in files:
+        path = os.path.join(parent, file)
+        dir_path = os.path.dirname(path)
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
+        f = open(path, "w", encoding="utf-8")
+        f.close()
+        result.append(path)
+
+    return result
 
 
-class TempEnvironmentHelper(BaseTempEnvironmentHelper):
-
-    def _create_environment(self, **kwargs):
-        if not hasattr(self, 'app'):
-            self.app = Flask(__name__, static_folder=self.tempdir, **kwargs)
-        self.env = Environment(self.app)
-        return self.env
-
-
-try:
-    from test.test_support import check_warnings
-except ImportError:
-    # Python < 2.6
-    import contextlib
-
-    @contextlib.contextmanager
-    def check_warnings(*filters, **kwargs):
-        # We cannot reasonably support this, we'd have to copy to much code.
-        # (or write our own). Since this is only testing warnings output,
-        # we might slide by ignoring it.
-        yield
+def new_blueprint(name, import_name=None, **kwargs):
+    if import_name is None:
+        from tests import bp_for_test
+        import_name = bp_for_test.__name__
+    bp = Blueprint(name, import_name, **kwargs)
+    return bp
