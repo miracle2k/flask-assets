@@ -275,6 +275,9 @@ class FlaskResolver(Resolver):
         else:
             filename = rel_path
 
+        # Windows compatibility
+        filename = filename.replace("\\", "/")
+
         flask_ctx = None
         if not has_request_context():
             flask_ctx = ctx.environment._app.test_request_context()
